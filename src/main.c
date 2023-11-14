@@ -29,8 +29,8 @@ int main(void)
 {
     // Initialization
     //--------------------------------------------------------------------------------------
-    const int screenWidth = 1280;
-    const int screenHeight = 720;
+    const int screenWidth = 1920;
+    const int screenHeight = 1080;
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(screenWidth, screenHeight, "raylib [shaders] example - raymarching shapes");
@@ -66,7 +66,7 @@ int main(void)
     {
         // Update
         //----------------------------------------------------------------------------------
-        UpdateCamera(&camera, CAMERA_FIRST_PERSON);
+        UpdateCamera(&camera, CAMERA_THIRD_PERSON);
 
         float cameraPos[3] = { camera.position.x, camera.position.y, camera.position.z };
         float cameraTarget[3] = { camera.target.x, camera.target.y, camera.target.z };
