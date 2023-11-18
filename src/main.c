@@ -1,117 +1,44 @@
-/*******************************************************************************************
-*
-*   raylib [shaders] example - Raymarching shapes generation
-*
-*   NOTE: This example requires raylib OpenGL 3.3 for shaders support and only #version 330
-*         is currently supported. OpenGL ES 2.0 platforms are not supported at the moment.
-*
-*   Example originally created with raylib 2.0, last time updated with raylib 4.2
-*
-*   Example licensed under an unmodified zlib/libpng license, which is an OSI-certified,
-*   BSD-like license that allows static linking with closed source software
-*
-*   Copyright (c) 2018-2023 Ramon Santamaria (@raysan5)
-*
-********************************************************************************************/
+/*
 
+*/
 #include "raylib.h"
+#include <math.h>
 
-#if defined(PLATFORM_DESKTOP)
-    #define GLSL_VERSION            330
-#else   // PLATFORM_ANDROID, PLATFORM_WEB -> Not supported at this moment
-    #define GLSL_VERSION            100
-#endif
-
-//------------------------------------------------------------------------------------
-// Program main entry point
-//------------------------------------------------------------------------------------
 int main(void)
 {
-    // Initialization
-    //--------------------------------------------------------------------------------------
-    const int screenWidth = 1920;
-    const int screenHeight = 1080;
+    const int pantallaAncho = 1920;
+    const int pantallaAlto = 1080;
 
-    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-    InitWindow(screenWidth, screenHeight, "raylib [shaders] example - raymarching shapes");
+    InitWindow(pantallaAncho, pantallaAlto, "Sumpy - Juego lúdico");
 
-    Camera camera = { 0 };
-    camera.position = (Vector3){ 2.5f, 2.5f, 3.0f };    // Camera position
-    camera.target = (Vector3){ 0.0f, 0.0f, 0.7f };      // Camera looking at point
-    camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };          // Camera up vector (rotation towards target)
-    camera.fovy = 65.0f;                                // Camera field-of-view Y
-    camera.projection = CAMERA_PERSPECTIVE;             // Camera projection type
+    SetTargetFPS(144);
 
-    // Load raymarching shader
-    // NOTE: Defining 0 (NULL) for vertex shader forces usage of internal default vertex shader
-    Shader shader = LoadShader(0, TextFormat("resources/shaders/glsl%i/raymarching.fs", GLSL_VERSION));
+    bool waiting = true;
+    float fontSize = 80.0f;
 
-    // Get shader locations for required uniforms
-    int viewEyeLoc = GetShaderLocation(shader, "viewEye");
-    int viewCenterLoc = GetShaderLocation(shader, "viewCenter");
-    int runTimeLoc = GetShaderLocation(shader, "runTime");
-    int resolutionLoc = GetShaderLocation(shader, "resolution");
-
-    float resolution[2] = { (float)screenWidth, (float)screenHeight };
-    SetShaderValue(shader, resolutionLoc, resolution, SHADER_UNIFORM_VEC2);
-
-    float runTime = 0.0f;
-
-    DisableCursor();                    // Limit cursor to relative movement inside the window
-    SetTargetFPS(144);                   // Set our game to run at 60 frames-per-second
-    //--------------------------------------------------------------------------------------
-
-    // Main game loop
-    while (!WindowShouldClose())        // Detect window close button or ESC key
+    Texture2D texture = LoadTexture("C:\\sumpy-ludic-game-raylib\\build\\resources\\background.png");
+    while (!WindowShouldClose())
     {
-        // Update
-        //----------------------------------------------------------------------------------
-        UpdateCamera(&camera, CAMERA_THIRD_PERSON);
+        ShowCursor();
 
-        float cameraPos[3] = { camera.position.x, camera.position.y, camera.position.z };
-        float cameraTarget[3] = { camera.target.x, camera.target.y, camera.target.z };
-
-        float deltaTime = GetFrameTime();
-        runTime += deltaTime;
-
-        // Set shader required uniform values
-        SetShaderValue(shader, viewEyeLoc, cameraPos, SHADER_UNIFORM_VEC3);
-        SetShaderValue(shader, viewCenterLoc, cameraTarget, SHADER_UNIFORM_VEC3);
-        SetShaderValue(shader, runTimeLoc, &runTime, SHADER_UNIFORM_FLOAT);
-
-        // Check if screen is resized
-        if (IsWindowResized())
-        {
-            resolution[0] = (float)GetScreenWidth();
-            resolution[1] = (float)GetScreenHeight();
-            SetShaderValue(shader, resolutionLoc, resolution, SHADER_UNIFORM_VEC2);
-        }
-        //----------------------------------------------------------------------------------
-
-        // Draw
-        //----------------------------------------------------------------------------------
         BeginDrawing();
+        DrawTexture(texture, pantallaAncho / 2 - texture.width / 2, pantallaAlto / 2 - texture.height / 2, WHITE);
+        if (waiting)
+        {
+            fontSize = 80.0f + 10.0f * sinf(GetTime() * 2.0f);
+            DrawText("Selecciona un nivel", pantallaAncho / 2 - MeasureText("Selecciona un nivel", fontSize) / 2, pantallaAlto / 2, fontSize, WHITE);
+        }
+        else
+        {
+            DrawText("Selecciona un nivel", pantallaAncho / 2 - MeasureText("Selecciona un nivel", 70) / 2, pantallaAlto / 2, 70, WHITE);
+        }
 
-            ClearBackground(RAYWHITE);
-
-            // We only draw a white full-screen rectangle,
-            // frame is generated in shader using raymarching
-            BeginShaderMode(shader);
-                DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), WHITE);
-            EndShaderMode();
-
-            DrawText("(c) Raymarching shader by Iñigo Quilez. MIT License.", GetScreenWidth() - 280, GetScreenHeight() - 20, 10, BLACK);
-
+        DrawText("Opciones", pantallaAncho / 2 - MeasureText("Opciones", 70) / 2, pantallaAlto * 0.6, 70, WHITE);
+        DrawText("Créditos", pantallaAncho / 2 - MeasureText("Créditos", 70) / 2, pantallaAlto * 0.7, 70, WHITE);
+        DrawText("Salir", pantallaAncho / 2 - MeasureText("Salir", 70) / 2, pantallaAlto * 0.8, 70, WHITE);
         EndDrawing();
-        //----------------------------------------------------------------------------------
     }
-
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
-    UnloadShader(shader);           // Unload shader
-
-    CloseWindow();                  // Close window and OpenGL context
-    //--------------------------------------------------------------------------------------
-
+    UnloadTexture(texture);
+    CloseWindow();
     return 0;
 }
