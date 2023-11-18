@@ -1,9 +1,8 @@
 /*
 
 */
-#include "raylib.h"
 #include <math.h>
-
+#include "raylib.h"
 
 int main(void)
 {
@@ -16,14 +15,15 @@ int main(void)
 
     bool waiting = true;
     float fontSize = 80.0f;
-
-    Texture2D texture = LoadTexture("C:\\sumpy-ludic-game-raylib\\build\\resources\\background.png");
+    
+    Texture2D texture = LoadTexture("resources\\background.png");
     while (!WindowShouldClose())
     {
         ShowCursor();
 
         BeginDrawing();
         DrawTexture(texture, pantallaAncho / 2 - texture.width / 2, pantallaAlto / 2 - texture.height / 2, WHITE);
+        DrawFPS(10, 10); 
         if (waiting)
         {
             fontSize = 80.0f + 10.0f * sinf(GetTime() * 2.0f);
