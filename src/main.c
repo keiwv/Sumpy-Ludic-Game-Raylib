@@ -4,6 +4,7 @@
 #include "raylib.h"
 #include <math.h>
 
+
 int main(void)
 {
     const int pantallaAncho = 1920;
