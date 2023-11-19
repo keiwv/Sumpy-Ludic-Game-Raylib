@@ -27,22 +27,21 @@ void DrawGame()
 
 void UpdateMenu()
 {
-    // Lógica de actualización del menú
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
     {
-        if (CheckMouseOnOption("Seleccionar nivel", 70, 0.5))
+        if (CheckMouseOnOption("Seleccionar nivel", 70, 0.532))
         {
             currentScene = SELECTGAME;
         }
-        if (CheckMouseOnOption("Opciones", 70, 0.65))
+        if (CheckMouseOnOption("Opciones", 70, 0.615))
         {
             currentScene = OPTIONS;
         }
-        if (CheckMouseOnOption("Créditos", 70, 0.8))
+        if (CheckMouseOnOption("Créditos", 70, 0.697))
         {
             currentScene = CREDITS;
         }
-        if (CheckMouseOnOption("Salir", 70, 0.9))
+        if (CheckMouseOnOption("Salir", 70, 0.78))
         {
             currentScene = EXIT;
         }
@@ -65,30 +64,30 @@ void DrawMenu()
         DrawText("Selecciona un nivel", GetScreenWidth() / 2 - MeasureText("Selecciona un nivel", 70) / 2, GetScreenHeight()/2, 70, WHITE);
     }
 
-    if (CheckMouseOnOption("Opciones", 70, 0.7))
+    if (CheckMouseOnOption("Opciones", 70, 0.615))
     {
-        DrawText("Opciones", GetScreenWidth() / 2 - MeasureText("Opciones", fontSize) / 2, GetScreenHeight() * 0.7, fontSize, YELLOW);
+        DrawText("Opciones", GetScreenWidth() / 2 - MeasureText("Opciones", fontSize) / 2, GetScreenHeight() * 0.5905, fontSize, YELLOW);
     }
     else
     {
-        DrawText("Opciones", GetScreenWidth() / 2 - MeasureText("Opciones", 70) / 2, GetScreenHeight() * 0.7, 70, WHITE);
+        DrawText("Opciones", GetScreenWidth() / 2 - MeasureText("Opciones", 70) / 2, GetScreenHeight() * 0.5905, 70, WHITE);
     }
 
-    if (CheckMouseOnOption("Créditos", 70, 0.8))
+    if (CheckMouseOnOption("Créditos", 70, 0.697))
     {
-        DrawText("Créditos", GetScreenWidth() / 2 - MeasureText("Créditos", fontSize) / 2, GetScreenHeight() * 0.8, fontSize, YELLOW);
+        DrawText("Créditos", GetScreenWidth() / 2 - MeasureText("Créditos", fontSize) / 2, GetScreenHeight() * 0.67545, fontSize, YELLOW);
     }
     else
     {
-        DrawText("Créditos", GetScreenWidth() / 2 - MeasureText("Créditos", 70) / 2, GetScreenHeight() * 0.8, 70, WHITE);
+        DrawText("Créditos", GetScreenWidth() / 2 - MeasureText("Créditos", 70) / 2, GetScreenHeight() * 0.67545, 70, WHITE);
     }
-    if (CheckMouseOnOption("Salir", 70, 0.9))
+    if (CheckMouseOnOption("Salir", 70, 0.78))
     {
-        DrawText("Salir", GetScreenWidth() / 2 - MeasureText("Salir", fontSize) / 2, GetScreenHeight() * 0.9, fontSize, YELLOW);
+        DrawText("Salir", GetScreenWidth() / 2 - MeasureText("Salir", fontSize) / 2, GetScreenHeight() * 0.755, fontSize, YELLOW);
     }
     else
     {
-        DrawText("Salir", GetScreenWidth() / 2 - MeasureText("Salir", 70) / 2, GetScreenHeight() * 0.9, 70, WHITE);
+        DrawText("Salir", GetScreenWidth() / 2 - MeasureText("Salir", 70) / 2, GetScreenHeight() * 0.755, 70, WHITE);
     }
 
     EndDrawing();
@@ -117,8 +116,10 @@ void DrawCredits()
 int main()
 {
     InitWindow(GetScreenWidth(), GetScreenHeight(), "Sumpy");
-    
-    while (!WindowShouldClose())
+
+    bool exitProgram = false;
+
+    while (!WindowShouldClose() && !exitProgram)
     {
         mousePosition = GetMousePosition();
 
@@ -141,7 +142,7 @@ int main()
             DrawCredits();
             break;
         case EXIT:
-            // Lógica para salir del programa
+            exitProgram = true;
             break;
         }
     }
@@ -154,10 +155,10 @@ bool CheckMouseOnOption(const char *optionText, float fontSize, float position)
 {
     Vector2 textSize = MeasureTextEx(GetFontDefault(), optionText, fontSize, 0);
 
-    float centerX = GetScreenWidth() / 2 - textSize.x / 2;
+    float centerX = GetScreenWidth() / 2 - textSize.x/2;
     float centerY = GetScreenHeight() * position - textSize.y / 2;
 
     Rectangle optionBounds = {centerX, centerY, textSize.x, textSize.y};
-    DrawRectangle(centerX, centerY, textSize.x, textSize.y, GREEN);
+
     return CheckCollisionPointRec(mousePosition, optionBounds);
 }
