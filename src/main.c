@@ -116,7 +116,6 @@ void DrawCredits()
 int main()
 {
     InitWindow(GetScreenWidth(), GetScreenHeight(), "Sumpy");
-
     bool exitProgram = false;
 
     while (!WindowShouldClose() && !exitProgram)
@@ -146,7 +145,6 @@ int main()
             break;
         }
     }
-
     CloseWindow();
     return 0;
 }
