@@ -14,16 +14,11 @@ GameScene currentScene = START;
 Vector2 mousePosition = {0};
 bool waiting = true;
 
+/********************************** PROTOTIPO DE FUNCIONES ************************************/
 bool CheckMouseOnOption(const char *optionText, float fontSize, float position);
 void generate_dinos(int frame, float runningTime, float frameTime, Texture2D dinosaurio, Texture2D sombra, float posX, float posY);
-
-void UpdateGame()
-{
-}
-void DrawGame()
-{
-}
-
+void generte_rec(void);
+/************************************************************************************************/
 void UpdateMenu()
 {
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
@@ -54,12 +49,8 @@ void DrawMenu(Texture2D dinosaurio, int frame, float runningTime, float frameTim
     ClearBackground(BLACK);
     float fontSize = 80.0f + 10.0f * sinf(GetTime() * 8.0f);
     /*****************************************  RECTANGULO TRANSPARENTE ***********************************/
-    Rectangle rec = {(float)GetScreenWidth() / 2 - 390, (float)GetScreenHeight() / 2 - 40, 769, 399};
     Color select = {255, 200, 0, 255};
-    Color rectangleColor = {0, 0, 0, 128};
-    Color borde = {0, 0, 0, 220};
-    DrawRectangleRoundedLines(rec, .30, .20, 13.f, borde);
-    DrawRectangleRounded(rec, .30, .50, rectangleColor);
+    generte_rec();
     /****************************************** DINOSAURIO  **********************************************/
     generate_dinos(frame, runningTime, frameTime, dinosaurio, sombra, 170.f, 600.f);
     /*****************************************************************************************************/
@@ -117,43 +108,56 @@ void DrawOptions(Texture2D dinosaurio, int frame, float runningTime, float frame
     // Lógica de dibujo de opciones
     BeginDrawing();
     ClearBackground(WHITE);
+    Color select = {255, 200, 0, 255};
     float fontSize = 80.0f + 10.0f * sinf(GetTime() * 8.0f);
+    /******************************* GENERAR RECTANGULO ******************************/
+    generte_rec();
+    /**************************** GENERAR DINOSAURIO  *******************************/
     generate_dinos(frame, runningTime, frameTime, dinosaurio, sombra, 1400.f, 580.f);
+    /********************************************************************************/
     if (CheckMouseOnOption("Pantalla completa", 70, 0.532))
     {
-        DrawText("Pantalla completa", GetScreenWidth() / 2 - MeasureText("Pantalla completa", fontSize) / 2, GetScreenHeight() / 2, fontSize, BLACK);
+        DrawText("Pantalla completa", GetScreenWidth() / 2 - MeasureText("Pantalla completa", fontSize) / 2, GetScreenHeight() / 2, fontSize, select);
     }
     else
     {
-        DrawText("Pantalla completa", GetScreenWidth() / 2 - MeasureText("Pantalla completa", 70) / 2, GetScreenHeight() / 2, 70, BLACK);
+        DrawText("Pantalla completa", GetScreenWidth() / 2 - MeasureText("Pantalla completa", 70) / 2, GetScreenHeight() / 2, 70, WHITE);
     }
 
-    if (CheckMouseOnOption("Cancelar musica", 70, 0.615))
+    if (CheckMouseOnOption("Silenciar musica", 70, 0.615))
     {
-        DrawText("Cancelar musica", GetScreenWidth() / 2 - MeasureText("Cancelar musica", fontSize) / 2, GetScreenHeight() * 0.5905, fontSize, BLACK);
+        DrawText("Silenciar musica", GetScreenWidth() / 2 - MeasureText("Silenciar musica", fontSize) / 2, GetScreenHeight() * 0.5905, fontSize, WHITE);
     }
     else
     {
-        DrawText("Cancelar musica", GetScreenWidth() / 2 - MeasureText("Cancelar musica", 70) / 2, GetScreenHeight() * 0.5905, 70, BLACK);
+        DrawText("Silenciar musica", GetScreenWidth() / 2 - MeasureText("Silenciar musica", 70) / 2, GetScreenHeight() * 0.5905, 70, WHITE);
     }
 
-    if (CheckMouseOnOption("Créditos", 70, 0.697))
+    if (CheckMouseOnOption("Modo ventana", 70, 0.697))
     {
-        DrawText("Créditos", GetScreenWidth() / 2 - MeasureText("Créditos", fontSize) / 2, GetScreenHeight() * 0.67545, fontSize, YELLOW);
+        DrawText("Modo ventana", GetScreenWidth() / 2 - MeasureText("Modo ventana", fontSize) / 2, GetScreenHeight() * 0.67545, fontSize, select);
     }
     else
     {
-        DrawText("Créditos", GetScreenWidth() / 2 - MeasureText("Créditos", 70) / 2, GetScreenHeight() * 0.67545, 70, WHITE);
+        DrawText("Modo ventana", GetScreenWidth() / 2 - MeasureText("Modo ventana", 70) / 2, GetScreenHeight() * 0.67545, 70, WHITE);
     }
     if (CheckMouseOnOption("Regresar", 70, 0.78))
     {
-        DrawText("Regresar", GetScreenWidth() / 2 - MeasureText("Regresar", fontSize) / 2, GetScreenHeight() * 0.755, fontSize, GRAY);
+        DrawText("Regresar", GetScreenWidth() / 2 - MeasureText("Regresar", fontSize) / 2, GetScreenHeight() * 0.755, fontSize, select);
     }
     else
     {
-        DrawText("Regresar", GetScreenWidth() / 2 - MeasureText("Regresar", 70) / 2, GetScreenHeight() * 0.755, 70, BLACK);
+        DrawText("Regresar", GetScreenWidth() / 2 - MeasureText("Regresar", 70) / 2, GetScreenHeight() * 0.755, 70, WHITE);
     }
     EndDrawing();
+}
+
+void UpdateGame()
+{
+}
+
+void DrawGame()
+{
 }
 
 void UpdateCredits()
@@ -166,10 +170,12 @@ void DrawCredits()
     // Lógica de dibujo de créditos
 }
 
+/***************************************** FUNCION PRINCIPAL *****************************************/
+
 int main()
 {
     InitWindow(GetScreenWidth(), GetScreenHeight(), "Sumpy");
-    /*******************************    MUSICA    *********************************/
+    /*******************************    MUSICA    **********************************/
     InitAudioDevice();
     Music music = LoadMusicStream("audios_danna\\menu_musica.mp3");
     Music level1 = LoadMusicStream("audios_danna\\LEVEL_.mp3");
@@ -259,6 +265,8 @@ int main()
     return 0;
 }
 
+/********************************** DESARROLLO DE FUNCIONES ************************************/
+
 bool CheckMouseOnOption(const char *optionText, float fontSize, float position)
 {
     Vector2 textSize = MeasureTextEx(GetFontDefault(), optionText, fontSize, 0);
@@ -278,4 +286,13 @@ void generate_dinos(int frame, float runningTime, float frameTime, Texture2D din
     Vector2 origin = {0.f, 0.f};
     DrawTexture(sombra, posX, 640, WHITE);
     DrawTexturePro(dinosaurio, source, dest, origin, 0.f, WHITE);
+}
+
+void generte_rec(void)
+{
+    Rectangle rec = {(float)GetScreenWidth() / 2 - 390, (float)GetScreenHeight() / 2 - 40, 769, 399};
+    Color rectangleColor = {0, 0, 0, 128};
+    Color borde = {0, 0, 0, 220};
+    DrawRectangleRoundedLines(rec, .30, .20, 13.f, borde);
+    DrawRectangleRounded(rec, .30, .50, rectangleColor);
 }
