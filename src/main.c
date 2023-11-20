@@ -3,6 +3,7 @@
 
 typedef enum
 {
+    LOGO,
     START,
     SELECTGAME,
     OPTIONS,
@@ -10,19 +11,48 @@ typedef enum
     EXIT
 } GameScene;
 
-GameScene currentScene = START;
+GameScene currentScene = LOGO;
 Vector2 mousePosition = {0};
 bool waiting = true;
 
+#define MATRIX_WIDTH 10
+#define MATRIX_HEIGHT 12
+#define RECTANGLE_SIZE 100
+
+int screenWidth = 1920;
+int screenHeight = 1080;
+
 bool CheckMouseOnOption(const char *optionText, float fontSize, float position);
+void logoLoading(Texture2D logoTexture, int frameCounter);
 
-void UpdateGame()
+void UpdateSelectGame()
 {
-
 }
-void DrawGame()
+void DrawSelectGame()
 {
+    BeginDrawing();
+    ClearBackground(BLACK);
 
+    int matrixX = 600 + (screenWidth - MATRIX_WIDTH * (RECTANGLE_SIZE + 10)) / 2;
+    int matrixY = (screenHeight - MATRIX_HEIGHT * (RECTANGLE_SIZE + 10)) / 2;
+
+    Rectangle rectangulo;
+    for (int i = 0; i < MATRIX_HEIGHT; i++)
+    {
+        for (int j = 0; j < MATRIX_WIDTH; j++)
+        {
+            rectangulo.height = RECTANGLE_SIZE;
+            rectangulo.width = RECTANGLE_SIZE;
+            rectangulo.x = matrixX + j * (RECTANGLE_SIZE + 10);
+            rectangulo.y = matrixY + i * (RECTANGLE_SIZE + 10);
+            DrawRectangleRounded(rectangulo, 0.4, 0, RED);
+            DrawRectangleRoundedLines(rectangulo, 0.4, 20, 2, WHITE);
+        }
+    }
+
+    DrawRectangleLines(screenHeight / 10, screenWidth / 2, 300, 200, RED);
+    DrawRectangleLines(50, 50, 1200, 200, BLUE);
+    EndDrawing();
 }
 
 void UpdateMenu()
@@ -57,37 +87,37 @@ void DrawMenu()
     float fontSize = 80.0f + 10.0f * sinf(GetTime() * 8.0f);
     if (CheckMouseOnOption("Selecciona un nivel", 70, 0.532))
     {
-        DrawText("Selecciona un nivel", GetScreenWidth() / 2 - MeasureText("Selecciona un nivel", fontSize) / 2, GetScreenHeight() / 2, fontSize, YELLOW);
+        DrawText("Selecciona un nivel", screenWidth / 2 - MeasureText("Selecciona un nivel", fontSize) / 2, screenHeight / 2, fontSize, YELLOW);
     }
     else
     {
-        DrawText("Selecciona un nivel", GetScreenWidth() / 2 - MeasureText("Selecciona un nivel", 70) / 2, GetScreenHeight()/2, 70, WHITE);
+        DrawText("Selecciona un nivel", screenWidth / 2 - MeasureText("Selecciona un nivel", 70) / 2, screenHeight / 2, 70, WHITE);
     }
 
     if (CheckMouseOnOption("Opciones", 70, 0.615))
     {
-        DrawText("Opciones", GetScreenWidth() / 2 - MeasureText("Opciones", fontSize) / 2, GetScreenHeight() * 0.5905, fontSize, YELLOW);
+        DrawText("Opciones", screenWidth / 2 - MeasureText("Opciones", fontSize) / 2, screenHeight * 0.5905, fontSize, YELLOW);
     }
     else
     {
-        DrawText("Opciones", GetScreenWidth() / 2 - MeasureText("Opciones", 70) / 2, GetScreenHeight() * 0.5905, 70, WHITE);
+        DrawText("Opciones", screenWidth / 2 - MeasureText("Opciones", 70) / 2, screenHeight * 0.5905, 70, WHITE);
     }
 
     if (CheckMouseOnOption("Créditos", 70, 0.697))
     {
-        DrawText("Créditos", GetScreenWidth() / 2 - MeasureText("Créditos", fontSize) / 2, GetScreenHeight() * 0.67545, fontSize, YELLOW);
+        DrawText("Créditos", screenWidth / 2 - MeasureText("Créditos", fontSize) / 2, screenHeight * 0.67545, fontSize, YELLOW);
     }
     else
     {
-        DrawText("Créditos", GetScreenWidth() / 2 - MeasureText("Créditos", 70) / 2, GetScreenHeight() * 0.67545, 70, WHITE);
+        DrawText("Créditos", screenWidth / 2 - MeasureText("Créditos", 70) / 2, screenHeight * 0.67545, 70, WHITE);
     }
     if (CheckMouseOnOption("Salir", 70, 0.78))
     {
-        DrawText("Salir", GetScreenWidth() / 2 - MeasureText("Salir", fontSize) / 2, GetScreenHeight() * 0.755, fontSize, YELLOW);
+        DrawText("Salir", screenWidth / 2 - MeasureText("Salir", fontSize) / 2, screenHeight * 0.755, fontSize, YELLOW);
     }
     else
     {
-        DrawText("Salir", GetScreenWidth() / 2 - MeasureText("Salir", 70) / 2, GetScreenHeight() * 0.755, 70, WHITE);
+        DrawText("Salir", screenWidth / 2 - MeasureText("Salir", 70) / 2, screenHeight * 0.755, 70, WHITE);
     }
 
     EndDrawing();
@@ -115,22 +145,29 @@ void DrawCredits()
 
 int main()
 {
-    InitWindow(GetScreenWidth(), GetScreenHeight(), "Sumpy");
+    InitWindow(screenWidth, screenHeight, "Sumpy");
     bool exitProgram = false;
-
+    int frameCounter = 0;
+    Texture2D logoTexture = LoadTexture("resources/logo2.png");
+    Image icon = LoadImage("resources/icon.ong");
+    SetWindowIcon(icon);
     while (!WindowShouldClose() && !exitProgram)
     {
         mousePosition = GetMousePosition();
 
         switch (currentScene)
         {
+        case LOGO:
+            frameCounter++;
+            logoLoading(logoTexture, frameCounter);
+            break;
         case START:
             UpdateMenu();
             DrawMenu();
             break;
         case SELECTGAME:
-            UpdateGame();
-            DrawGame();
+            // UpdateSelectGame();
+            DrawSelectGame();
             break;
         case OPTIONS:
             UpdateOptions();
@@ -145,18 +182,54 @@ int main()
             break;
         }
     }
+    UnloadTexture(logoTexture);
+    UnloadImage(icon);
     CloseWindow();
     return 0;
 }
 
+void logoLoading(Texture2D logoTexture, int frameCounter)
+{
+    float logoOpacity = 0.0f;
+
+  
+    if (frameCounter <= 500)
+    {
+      
+        logoOpacity += 1.0f / 60.0f;
+    }
+
+    if (frameCounter > 60 && frameCounter <= 120)
+    {
+        logoOpacity = 1.0f;
+    }
+
+    if (frameCounter > 120 && frameCounter <= 180)
+    {
+
+        logoOpacity -= 1.0f / 60.0f;
+    }
+
+    if (frameCounter > 2000)
+    {
+
+        currentScene = START;
+    }
+
+    BeginDrawing();
+    ClearBackground(GREEN);
+    DrawTexturePro(logoTexture, (Rectangle){0, 0, logoTexture.width, logoTexture.height},
+                   (Rectangle){screenWidth / 2 - logoTexture.width / 2, screenHeight / 2 - logoTexture.height / 2,
+                               logoTexture.width, logoTexture.height},
+                   (Vector2){0, 0}, 0.0f, Fade(WHITE, logoOpacity));
+    EndDrawing();
+}
 bool CheckMouseOnOption(const char *optionText, float fontSize, float position)
 {
     Vector2 textSize = MeasureTextEx(GetFontDefault(), optionText, fontSize, 0);
-
-    float centerX = GetScreenWidth() / 2 - textSize.x/2;
-    float centerY = GetScreenHeight() * position - textSize.y / 2;
+    float centerX = screenWidth / 2 - textSize.x / 2;
+    float centerY = screenHeight * position - textSize.y / 2;
 
     Rectangle optionBounds = {centerX, centerY, textSize.x, textSize.y};
-
     return CheckCollisionPointRec(mousePosition, optionBounds);
 }
