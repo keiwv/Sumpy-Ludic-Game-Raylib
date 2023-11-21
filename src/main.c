@@ -18,28 +18,29 @@ const int screenWidth = 1920;
 const int screenHeight = 1080;
 
 /********************************** PROTOTIPO DE FUNCIONES ************************************/
-bool CheckMouseOnOption(const char *optionText, float fontSize, float position);
+bool CheckMouseOnOptionY(const char *optionText, float fontSize, float position);
 void generate_dinos(int frame, float runningTime, float frameTime, Texture2D dinosaurio, Texture2D sombra, float posX, float posY, int maxFrames);
 void generate_dino_noAnimated(Texture2D dinosaurio, int maxFrames, Texture2D sombra, float posX, float posY);
 void generte_rec(void);
+bool CheckMouseOnOptionXandY(const char *optionText, float fontSize, float positionX, float positionY);
 /************************************************************************************************/
 void UpdateMenu()
 {
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
     {
-        if (CheckMouseOnOption("Seleccionar nivel", 70, 0.532))
+        if (CheckMouseOnOptionY("Seleccionar nivel", 70, 0.532))
         {
             currentScene = SELECTGAME;
         }
-        if (CheckMouseOnOption("Opciones", 70, 0.697))
+        if (CheckMouseOnOptionY("Opciones", 70, 0.697))
         {
             currentScene = OPTIONS;
         }
-        if (CheckMouseOnOption("Personaje", 70, 0.615))
+        if (CheckMouseOnOptionY("Personaje", 70, 0.615))
         {
             currentScene = CUSTOME;
         }
-        if (CheckMouseOnOption("Salir", 70, 0.78))
+        if (CheckMouseOnOptionY("Salir", 70, 0.78))
         {
             currentScene = EXIT;
         }
@@ -59,7 +60,7 @@ void DrawMenu(Texture2D dinosaurio, int frame, float runningTime, float frameTim
     int maxFrames = 24;
     generate_dinos(frame, runningTime, frameTime, dinosaurio, sombra, (float)screenWidth / 8, (float)screenHeight / 1.6, maxFrames);
     /*****************************************************************************************************/
-    if (CheckMouseOnOption("Selecciona un nivel", 70, 0.532))
+    if (CheckMouseOnOptionY("Selecciona un nivel", 70, 0.532))
     {
         DrawText("Selecciona un nivel", screenWidth / 2 - MeasureText("Selecciona un nivel", fontSize) / 2, screenHeight / 2, fontSize, select);
     }
@@ -68,7 +69,7 @@ void DrawMenu(Texture2D dinosaurio, int frame, float runningTime, float frameTim
         DrawText("Selecciona un nivel", screenWidth / 2 - MeasureText("Selecciona un nivel", 70) / 2, screenHeight / 2, 70, WHITE);
     }
 
-    if (CheckMouseOnOption("Personajes", 70, 0.615))
+    if (CheckMouseOnOptionY("Personajes", 70, 0.615))
     {
         DrawText("Personajes", screenWidth / 2 - MeasureText("Personajes", fontSize) / 2, screenHeight * 0.5905, fontSize, select);
     }
@@ -77,7 +78,7 @@ void DrawMenu(Texture2D dinosaurio, int frame, float runningTime, float frameTim
         DrawText("Personajes", screenWidth / 2 - MeasureText("Personajes", 70) / 2, screenHeight * 0.5905, 70, WHITE);
     }
 
-    if (CheckMouseOnOption("Opciones", 70, 0.697))
+    if (CheckMouseOnOptionY("Opciones", 70, 0.697))
     {
         DrawText("Opciones", screenWidth / 2 - MeasureText("Opciones", fontSize) / 2, screenHeight * 0.67545, fontSize, select);
     }
@@ -86,7 +87,7 @@ void DrawMenu(Texture2D dinosaurio, int frame, float runningTime, float frameTim
         DrawText("Opciones", screenWidth / 2 - MeasureText("Opciones", 70) / 2, screenHeight * 0.67545, 70, WHITE);
     }
 
-    if (CheckMouseOnOption("Salir", 70, 0.78))
+    if (CheckMouseOnOptionY("Salir", 70, 0.78))
     {
         DrawText("Salir", screenWidth / 2 - MeasureText("Salir", fontSize) / 2, screenHeight * 0.755, fontSize, select);
     }
@@ -103,18 +104,18 @@ void UpdateOptions(Music music)
     bool stopMusic = false;
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
     {
-        if (CheckMouseOnOption("Regresar", 70, 0.78))
+        if (CheckMouseOnOptionY("Regresar", 70, 0.78))
         {
             currentScene = START;
         }
-        if (CheckMouseOnOption("Silenciar musica", 70, 0.615))
+        if (CheckMouseOnOptionY("Silenciar musica", 70, 0.615))
         {
             if (!stopMusic)
             {
                 PauseMusicStream(music);
             }
         }
-        if (CheckMouseOnOption("Personaje", 70, 0.697))
+        if (CheckMouseOnOptionY("Personaje", 70, 0.697))
         {
             ResumeMusicStream(music);
             stopMusic = true;
@@ -134,7 +135,7 @@ void DrawOptions(Texture2D dinosaurio, int frame, float runningTime, float frame
     /**************************** GENERAR DINOSAURIO  *******************************/
     generate_dinos(frame, runningTime, frameTime, dinosaurio, sombra, screenWidth / 1.35, screenHeight / 2, 24);
     /********************************************************************************/
-    if (CheckMouseOnOption("Efectos de sonido", 70, 0.532))
+    if (CheckMouseOnOptionY("Efectos de sonido", 70, 0.532))
     {
         DrawText("Efectos de sonido", screenWidth / 2 - MeasureText("Efectos de sonido", fontSize) / 2, screenHeight / 2, fontSize, select);
     }
@@ -143,7 +144,7 @@ void DrawOptions(Texture2D dinosaurio, int frame, float runningTime, float frame
         DrawText("Efectos de sonido", screenWidth / 2 - MeasureText("Efectos de sonido", 70) / 2, screenHeight / 2, 70, WHITE);
     }
 
-    if (CheckMouseOnOption("Silenciar musica", 70, 0.615))
+    if (CheckMouseOnOptionY("Silenciar musica", 70, 0.615))
     {
         DrawText("Silenciar musica", screenWidth / 2 - MeasureText("Silenciar musica", fontSize) / 2, screenHeight * 0.5905, fontSize, WHITE);
     }
@@ -152,7 +153,7 @@ void DrawOptions(Texture2D dinosaurio, int frame, float runningTime, float frame
         DrawText("Silenciar musica", screenWidth / 2 - MeasureText("Silenciar musica", 70) / 2, screenHeight * 0.5905, 70, WHITE);
     }
 
-    if (CheckMouseOnOption("Activar musica", 70, 0.697))
+    if (CheckMouseOnOptionY("Activar musica", 70, 0.697))
     {
         DrawText("Activar musica", screenWidth / 2 - MeasureText("Activar musica", fontSize) / 2, screenHeight * 0.67545, fontSize, select);
     }
@@ -160,7 +161,7 @@ void DrawOptions(Texture2D dinosaurio, int frame, float runningTime, float frame
     {
         DrawText("Activar musica", screenWidth / 2 - MeasureText("Activar musica", 70) / 2, screenHeight * 0.67545, 70, WHITE);
     }
-    if (CheckMouseOnOption("Regresar", 70, 0.78))
+    if (CheckMouseOnOptionY("Regresar", 70, 0.78))
     {
         DrawText("Regresar", screenWidth / 2 - MeasureText("Regresar", fontSize) / 2, screenHeight * 0.755, fontSize, select);
     }
@@ -184,11 +185,11 @@ void UpdateCustome()
     // Lógica de actualización de créditos
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
     {
-        if (CheckMouseOnOption("Regresar", 70, 0.85))
+        if (CheckMouseOnOptionY("Regresar", 70, 0.84))
         {
             currentScene = START;
         }
-        if (CheckMouseOnOption("Espy", 70, 0.3))
+        if (CheckMouseOnOptionXandY("Espy", 100, 0.3, 0.4))
         {
             currentScene = START;
         }
@@ -209,7 +210,7 @@ void DrawCustome(Texture2D dino, Texture2D dino2, Texture2D dino3, Texture2D som
     DrawRectangleRoundedLines(rec, .30, .20, 13.f, borde);
     DrawRectangleRounded(rec, .30, .50, rectangleColor);
     /***************************     animar texto      ***************************/
-    if (CheckMouseOnOption("Regresar", 70, .85))
+    if (CheckMouseOnOptionY("Regresar", 70, 0.84))
     {
         DrawText("Regresar", screenWidth / 2 - MeasureText("Regresar", fontSize) / 2, screenHeight * 0.800, fontSize, select);
     }
@@ -217,8 +218,8 @@ void DrawCustome(Texture2D dino, Texture2D dino2, Texture2D dino3, Texture2D som
     {
         DrawText("Regresar", screenWidth / 2 - MeasureText("Regresar", 70) / 2, screenHeight * 0.800, 70, WHITE);
     }
-
-    if (CheckMouseOnOption("Espy", 100, .3))
+                                            //X    Y
+    if (CheckMouseOnOptionXandY("Espy", 100, 0.5, 0.8))
     {
         DrawText("Espy", screenWidth / 2 - MeasureText("Espy", 70) / 0.3, screenHeight / 1.3, fontSize, select);
     }
@@ -351,12 +352,25 @@ int main()
 
 /********************************** DESARROLLO DE FUNCIONES ************************************/
 
-bool CheckMouseOnOption(const char *optionText, float fontSize, float position)
+bool CheckMouseOnOptionY(const char *optionText, float fontSize, float position)
 {
     Vector2 textSize = MeasureTextEx(GetFontDefault(), optionText, fontSize, 0);
 
     float centerX = screenWidth / 2 - textSize.x / 2;
     float centerY = screenHeight * position - textSize.y / 2;
+
+    Rectangle optionBounds = {centerX, centerY, textSize.x, textSize.y};
+    DrawRectangle(centerX, centerY, textSize.x, textSize.y, GREEN);
+
+    return CheckCollisionPointRec(mousePosition, optionBounds);
+}
+
+bool CheckMouseOnOptionXandY(const char *optionText, float fontSize, float positionX, float positionY)
+{
+    Vector2 textSize = MeasureTextEx(GetFontDefault(), optionText, fontSize, 0);
+
+    float centerX = screenWidth * positionX/ 2 - textSize.x / 2;
+    float centerY = screenHeight * positionY - textSize.y / 2;
 
     Rectangle optionBounds = {centerX, centerY, textSize.x, textSize.y};
     DrawRectangle(centerX, centerY, textSize.x, textSize.y, GREEN);
