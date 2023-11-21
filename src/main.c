@@ -183,16 +183,29 @@ void DrawGame()
 void UpdateCustome()
 {
     // Lógica de actualización de créditos
+    float fontSize = 80.0f + 10.0f * sinf(GetTime() * 8.0f);
+
+    static int selectDino = 0;
+    static bool mostrarMensaje = false;
+
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
     {
         if (CheckMouseOnOptionY("Regresar", 70, 0.84))
         {
             currentScene = START;
+            mostrarMensaje = false;
         }
-        if (CheckMouseOnOptionXandY("Espy", 100, 0.3, 0.4))
+        if (CheckMouseOnOptionXandY("Espy", 100, 0.5, 0.8))
         {
-            currentScene = START;
+            selectDino = 1;
+            mostrarMensaje = true;
         }
+    }
+
+    if (mostrarMensaje)
+    {
+        DrawText("LISTO", screenWidth / 2.35 - MeasureText("LISTO", fontSize) / 2, screenHeight / 2.6, fontSize*2.0f, BLACK);
+
     }
 }
 
@@ -218,7 +231,7 @@ void DrawCustome(Texture2D dino, Texture2D dino2, Texture2D dino3, Texture2D som
     {
         DrawText("Regresar", screenWidth / 2 - MeasureText("Regresar", 70) / 2, screenHeight * 0.800, 70, WHITE);
     }
-                                            //X    Y
+    // X    Y
     if (CheckMouseOnOptionXandY("Espy", 100, 0.5, 0.8))
     {
         DrawText("Espy", screenWidth / 2 - MeasureText("Espy", 70) / 0.3, screenHeight / 1.3, fontSize, select);
@@ -309,11 +322,6 @@ int main()
             UpdateMenu();
             DrawMenu(dino1, frame, runningTime, frameTime, sombra);
             break;
-        case SELECTGAME:
-            UpdateMusicStream(level1);
-            UpdateGame();
-            DrawGame();
-            break;
         case OPTIONS:
             UpdateMusicStream(music);
             DrawTextureEx(texture_options, postionTexture, 0, 1.0f, WHITE);
@@ -325,6 +333,11 @@ int main()
             DrawTextureEx(texture_custome, postionTexture, 0, 1.0f, WHITE);
             UpdateCustome();
             DrawCustome(dino1, dino4, dino3, sombra);
+        case SELECTGAME:
+            UpdateMusicStream(level1);
+            UpdateGame();
+            DrawGame();
+            break;
             break;
         case EXIT:
             exitProgram = true;
@@ -369,7 +382,7 @@ bool CheckMouseOnOptionXandY(const char *optionText, float fontSize, float posit
 {
     Vector2 textSize = MeasureTextEx(GetFontDefault(), optionText, fontSize, 0);
 
-    float centerX = screenWidth * positionX/ 2 - textSize.x / 2;
+    float centerX = screenWidth * positionX / 2 - textSize.x / 2;
     float centerY = screenHeight * positionY - textSize.y / 2;
 
     Rectangle optionBounds = {centerX, centerY, textSize.x, textSize.y};
