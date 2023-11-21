@@ -255,6 +255,8 @@ void DrawCustome(Texture2D dino, Texture2D dino2, Texture2D dino3, Texture2D som
 int main()
 {
     InitWindow(screenWidth, screenHeight, "Sumpy");
+    Image icon = LoadImage("imagenes_danna\\icon.png");
+    SetWindowIcon(icon);
     /*******************************    MUSICA    **********************************/
     InitAudioDevice();
     Music music = LoadMusicStream("audios_danna\\menu_musica.mp3");
