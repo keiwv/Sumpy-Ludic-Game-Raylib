@@ -11,16 +11,16 @@ typedef enum
     EXIT
 } GameScene;
 
-GameScene currentScene = LOGO;
+GameScene currentScene = START;
 Vector2 mousePosition = {0};
 bool waiting = true;
 
-#define MATRIX_WIDTH 10
-#define MATRIX_HEIGHT 12
+#define MATRIX_WIDTH 6
+#define MATRIX_HEIGHT 7
 #define RECTANGLE_SIZE 100
 
-int screenWidth = 1920;
-int screenHeight = 1080;
+int screenWidth = 2560;
+int screenHeight = 1440;
 
 bool CheckMouseOnOption(const char *optionText, float fontSize, float position);
 void logoLoading(Texture2D logoTexture, int frameCounter);
@@ -149,12 +149,12 @@ int main()
     bool exitProgram = false;
     int frameCounter = 0;
     Texture2D logoTexture = LoadTexture("resources/logo2.png");
-    Image icon = LoadImage("resources/icon.ong");
+    Image icon = LoadImage("resources/icon.png");
     SetWindowIcon(icon);
     while (!WindowShouldClose() && !exitProgram)
     {
         mousePosition = GetMousePosition();
-
+        
         switch (currentScene)
         {
         case LOGO:
