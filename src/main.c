@@ -11,7 +11,7 @@ typedef enum
     EXIT
 } GameScene;
 
-GameScene currentScene = START;
+GameScene currentScene = SELECTGAME;
 Vector2 mousePosition = {0};
 bool waiting = true;
 
@@ -19,8 +19,8 @@ bool waiting = true;
 #define MATRIX_HEIGHT 7
 #define RECTANGLE_SIZE 100
 
-int screenWidth = 2560;
-int screenHeight = 1440;
+int screenWidth = 1920;
+int screenHeight = 1080;
 
 bool CheckMouseOnOption(const char *optionText, float fontSize, float position);
 void logoLoading(Texture2D logoTexture, int frameCounter);
