@@ -4,14 +4,23 @@
 typedef enum
 {
     LOGO,
-    START,
+    MENU,
     SELECTGAME,
     OPTIONS,
     CREDITS,
     EXIT
 } GameScene;
 
-GameScene currentScene = SELECTGAME;
+typedef enum
+{
+    WAITING,
+    LEVEL1,
+    LEVEL2,
+} GameLevel;
+
+GameScene currentScene = MENU;
+GameLevel currentGameLevel = WAITING;
+
 Vector2 mousePosition = {0};
 bool waiting = true;
 
@@ -22,39 +31,97 @@ bool waiting = true;
 int screenWidth = 1920;
 int screenHeight = 1080;
 
-bool CheckMouseOnOption(const char *optionText, float fontSize, float position);
+//****** PROTOTYPE FUNCTIONS *********************
 void logoLoading(Texture2D logoTexture, int frameCounter);
 
-void UpdateSelectGame()
-{
-}
-void DrawSelectGame()
-{
-    BeginDrawing();
-    ClearBackground(BLACK);
+void UpdateMenu();
+void DrawMenu();
 
-    int matrixX = 600 + (screenWidth - MATRIX_WIDTH * (RECTANGLE_SIZE + 10)) / 2;
-    int matrixY = (screenHeight - MATRIX_HEIGHT * (RECTANGLE_SIZE + 10)) / 2;
+void UpdateSelectGame();
+void MainSelectGame();
+void DrawSelectGame();
 
-    Rectangle rectangulo;
-    for (int i = 0; i < MATRIX_HEIGHT; i++)
+void UpdateGame();
+void DrawGame();
+
+bool CheckMouseOnOption(const char *optionText, float fontSize, float position);
+
+int main()
+{
+    InitWindow(screenWidth, screenHeight, "Sumpy");
+    bool exitProgram = false;
+    int frameCounter = 0;
+    Texture2D logoTexture = LoadTexture("resources/logo2.png");
+    Image icon = LoadImage("resources/icon.png");
+    SetWindowIcon(icon);
+    while (!WindowShouldClose() && !exitProgram)
     {
-        for (int j = 0; j < MATRIX_WIDTH; j++)
+        mousePosition = GetMousePosition();
+
+        switch (currentScene)
         {
-            rectangulo.height = RECTANGLE_SIZE;
-            rectangulo.width = RECTANGLE_SIZE;
-            rectangulo.x = matrixX + j * (RECTANGLE_SIZE + 10);
-            rectangulo.y = matrixY + i * (RECTANGLE_SIZE + 10);
-            DrawRectangleRounded(rectangulo, 0.4, 0, RED);
-            DrawRectangleRoundedLines(rectangulo, 0.4, 20, 2, WHITE);
+        case LOGO:
+            frameCounter++;
+            logoLoading(logoTexture, frameCounter);
+            break;
+        case MENU:
+            UpdateMenu();
+            DrawMenu();
+            break;
+        case SELECTGAME:
+            MainSelectGame();
+            break;
+        case OPTIONS:
+            break;
+        case CREDITS:
+            break;
+        case EXIT:
+            break;
         }
     }
+    UnloadTexture(logoTexture);
+    UnloadImage(icon);
+    CloseWindow();
+    return 0;
+}
+//************ LOGO LOADING ********
+void logoLoading(Texture2D logoTexture, int frameCounter)
+{
+    float logoOpacity = 0.0f;
 
-    DrawRectangleLines(screenHeight / 10, screenWidth / 2, 300, 200, RED);
-    DrawRectangleLines(50, 50, 1200, 200, BLUE);
+    if (frameCounter <= 500)
+    {
+
+        logoOpacity += 1.0f / 60.0f;
+    }
+
+    if (frameCounter > 60 && frameCounter <= 120)
+    {
+        logoOpacity = 1.0f;
+    }
+
+    if (frameCounter > 120 && frameCounter <= 180)
+    {
+
+        logoOpacity -= 1.0f / 60.0f;
+    }
+
+    if (frameCounter > 2000)
+    {
+
+        currentScene = MENU;
+    }
+
+    BeginDrawing();
+    ClearBackground(GREEN);
+    DrawTexturePro(logoTexture, (Rectangle){0, 0, logoTexture.width, logoTexture.height},
+                   (Rectangle){screenWidth / 2 - logoTexture.width / 2, screenHeight / 2 - logoTexture.height / 2,
+                               logoTexture.width, logoTexture.height},
+                   (Vector2){0, 0}, 0.0f, Fade(WHITE, logoOpacity));
     EndDrawing();
 }
 
+//************ START FUNCTIONS *************
 void UpdateMenu()
 {
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
@@ -123,107 +190,89 @@ void DrawMenu()
     EndDrawing();
 }
 
-void UpdateOptions()
+//************* SELECT GAME FUNCTIONS ********************
+void UpdateSelectGame()
 {
-    // Lógica de actualización de opciones
-}
-
-void DrawOptions()
-{
-    // Lógica de dibujo de opciones
-}
-
-void UpdateCredits()
-{
-    // Lógica de actualización de créditos
-}
-
-void DrawCredits()
-{
-    // Lógica de dibujo de créditos
-}
-
-int main()
-{
-    InitWindow(screenWidth, screenHeight, "Sumpy");
-    bool exitProgram = false;
-    int frameCounter = 0;
-    Texture2D logoTexture = LoadTexture("resources/logo2.png");
-    Image icon = LoadImage("resources/icon.png");
-    SetWindowIcon(icon);
-    while (!WindowShouldClose() && !exitProgram)
+    Rectangle LEVEL1_RECT = {10, 10, 20, 20};
+    Rectangle LEVEL2_RECT = {300, 300, 300, 300};
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
     {
-        mousePosition = GetMousePosition();
-        
-        switch (currentScene)
+        if (CheckCollisionPointRec(mousePosition, LEVEL1_RECT))
         {
-        case LOGO:
-            frameCounter++;
-            logoLoading(logoTexture, frameCounter);
-            break;
-        case START:
-            UpdateMenu();
-            DrawMenu();
-            break;
-        case SELECTGAME:
-            // UpdateSelectGame();
-            DrawSelectGame();
-            break;
-        case OPTIONS:
-            UpdateOptions();
-            DrawOptions();
-            break;
-        case CREDITS:
-            UpdateCredits();
-            DrawCredits();
-            break;
-        case EXIT:
-            exitProgram = true;
-            break;
+            currentGameLevel = LEVEL1;
+        }
+        if (CheckCollisionPointRec(mousePosition, LEVEL2_RECT))
+        {
+            currentGameLevel = LEVEL2;
         }
     }
-    UnloadTexture(logoTexture);
-    UnloadImage(icon);
-    CloseWindow();
-    return 0;
 }
 
-void logoLoading(Texture2D logoTexture, int frameCounter)
+void MainSelectGame()
 {
-    float logoOpacity = 0.0f;
-
-  
-    if (frameCounter <= 500)
+    switch (currentGameLevel)
     {
-      
-        logoOpacity += 1.0f / 60.0f;
+    case WAITING:
+        UpdateSelectGame();
+        DrawSelectGame();
+        break;
+    case LEVEL1:
+        BeginDrawing();
+        ClearBackground(BLACK);
+        EndDrawing();
+        break;
+    case LEVEL2:
+        BeginDrawing();
+        ClearBackground(WHITE);
+        EndDrawing();
+        break;
     }
+}
 
-    if (frameCounter > 60 && frameCounter <= 120)
-    {
-        logoOpacity = 1.0f;
-    }
-
-    if (frameCounter > 120 && frameCounter <= 180)
-    {
-
-        logoOpacity -= 1.0f / 60.0f;
-    }
-
-    if (frameCounter > 2000)
-    {
-
-        currentScene = START;
-    }
-
+void DrawSelectGame()
+{
+    Rectangle LEVEL1_RECT = {10, 10, 20, 20};
+    Rectangle LEVEL2_RECT = {300, 300, 300, 300};
     BeginDrawing();
-    ClearBackground(GREEN);
-    DrawTexturePro(logoTexture, (Rectangle){0, 0, logoTexture.width, logoTexture.height},
-                   (Rectangle){screenWidth / 2 - logoTexture.width / 2, screenHeight / 2 - logoTexture.height / 2,
-                               logoTexture.width, logoTexture.height},
-                   (Vector2){0, 0}, 0.0f, Fade(WHITE, logoOpacity));
+    ClearBackground(PURPLE);
+    DrawRectangleRec(LEVEL1_RECT, WHITE);
+    DrawRectangleRec(LEVEL2_RECT, BLACK);
     EndDrawing();
 }
+
+//************* GAME *******************
+void UpdateGame()
+{
+    DrawGame();
+}
+
+void DrawGame()
+{
+    BeginDrawing();
+    ClearBackground(BLACK);
+
+    int matrixX = 600 + (screenWidth - MATRIX_WIDTH * (RECTANGLE_SIZE + 10)) / 2;
+    int matrixY = (screenHeight - MATRIX_HEIGHT * (RECTANGLE_SIZE + 10)) / 2;
+
+    Rectangle rectangulo;
+    for (int i = 0; i < MATRIX_HEIGHT; i++)
+    {
+        for (int j = 0; j < MATRIX_WIDTH; j++)
+        {
+            rectangulo.height = RECTANGLE_SIZE;
+            rectangulo.width = RECTANGLE_SIZE;
+            rectangulo.x = matrixX + j * (RECTANGLE_SIZE + 10);
+            rectangulo.y = matrixY + i * (RECTANGLE_SIZE + 10);
+            DrawRectangleRounded(rectangulo, 0.4, 0, RED);
+            DrawRectangleRoundedLines(rectangulo, 0.4, 20, 2, WHITE);
+        }
+    }
+
+    DrawRectangleLines(screenHeight / 10, screenWidth / 2, 300, 200, RED);
+    DrawRectangleLines(50, 50, 1200, 200, BLUE);
+    EndDrawing();
+}
+//************* USEFUL FUNCTIONS ****************************
 bool CheckMouseOnOption(const char *optionText, float fontSize, float position)
 {
     Vector2 textSize = MeasureTextEx(GetFontDefault(), optionText, fontSize, 0);
