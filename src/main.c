@@ -12,11 +12,11 @@ typedef enum
 
 GameScene currentScene = START;
 Vector2 mousePosition = {0};
+/********************  Variables y constantes globales *************************/
 bool waiting = true;
-
+int selectDino = 0;
 const int screenWidth = 1920;
 const int screenHeight = 1080;
-
 /********************************** PROTOTIPO DE FUNCIONES ************************************/
 bool CheckMouseOnOptionY(const char *optionText, float fontSize, float position);
 void generate_dinos(int frame, float runningTime, float frameTime, Texture2D dinosaurio, Texture2D sombra, float posX, float posY, int maxFrames);
@@ -185,7 +185,6 @@ void UpdateCustome()
     // Lógica de actualización de créditos
     float fontSize = 80.0f + 10.0f * sinf(GetTime() * 8.0f);
 
-    static int selectDino = 0;
     static bool mostrarMensaje = false;
 
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
@@ -195,17 +194,33 @@ void UpdateCustome()
             currentScene = START;
             mostrarMensaje = false;
         }
-        if (CheckMouseOnOptionXandY("Espy", 100, 0.5, 0.8))
+        if (/* condition */)
         {
-            selectDino = 1;
-            mostrarMensaje = true;
+            /* code */
+        }
+        else
+        {
+            if (CheckMouseOnOptionXandY("Espy", 70, 0.5, 0.43)) // verifica que dinosaurio escogio
+            {
+                selectDino = 1;
+                mostrarMensaje = true;
+            }
+            if (CheckMouseOnOptionXandY("Nacky", 70, 1, 0.43))
+            {
+                selectDino = 2;
+                mostrarMensaje = true;
+            }
+            if (CheckMouseOnOptionXandY("Juan", 80, 1.4, 0.43))
+            {
+                selectDino = 3;
+                mostrarMensaje = true;
+            }
         }
     }
 
     if (mostrarMensaje)
     {
-        DrawText("LISTO", screenWidth / 2.35 - MeasureText("LISTO", fontSize) / 2, screenHeight / 2.6, fontSize*2.0f, BLACK);
-
+        DrawText("LISTO", screenWidth / 2.35 - MeasureText("LISTO", fontSize) / 2, screenHeight / 4, fontSize * 2.0f, BLACK);
     }
 }
 
@@ -231,17 +246,33 @@ void DrawCustome(Texture2D dino, Texture2D dino2, Texture2D dino3, Texture2D som
     {
         DrawText("Regresar", screenWidth / 2 - MeasureText("Regresar", 70) / 2, screenHeight * 0.800, 70, WHITE);
     }
+    /**********************************  nombres de dinosaurios  ****************************************/
     // X    Y
-    if (CheckMouseOnOptionXandY("Espy", 100, 0.5, 0.8))
+    if (CheckMouseOnOptionXandY("Espy", 70, 0.5, 0.43))
     {
-        DrawText("Espy", screenWidth / 2 - MeasureText("Espy", 70) / 0.3, screenHeight / 1.3, fontSize, select);
+        DrawText("Espy", screenWidth / 2 - MeasureText("Espy", 70) / 0.3, screenHeight / 2.5, fontSize, select);
     }
     else
     {
-        DrawText("Espy", screenWidth / 2 - MeasureText("Espy", 70) / 0.3, screenHeight / 1.3, 70, WHITE);
+        DrawText("Espy", screenWidth / 2 - MeasureText("Espy", 70) / 0.3, screenHeight / 2.5, 70, WHITE);
     }
-    /************************   seleccion de dinosaurio    ************************/
 
+    if (CheckMouseOnOptionXandY("Nacky", 70, 1, 0.43))
+    {
+        DrawText("Nacky", screenWidth / 2 - MeasureText("Nacky", 70) / 2, screenHeight / 2.5, fontSize, select);
+    }
+    else
+    {
+        DrawText("Nacky", screenWidth / 2 - MeasureText("Nacky", 70) / 2, screenHeight / 2.5, 70, WHITE);
+    }
+    if (CheckMouseOnOptionXandY("Juan", 80, 1.4, 0.43))
+    {
+        DrawText("Juan", screenWidth / 1.4 - MeasureText("Juan", 70) / 2, screenHeight / 2.5, fontSize, select);
+    }
+    else
+    {
+        DrawText("Juan", screenWidth / 1.4 - MeasureText("Juan", 70) / 2, screenHeight / 2.5, 70, WHITE);
+    }
     /***********************  Dibujar dinosaurios  ***************************/
     generate_dino_noAnimated(dino, 24, sombra, (screenWidth / 2 - MeasureText("Regresar", 90) / 2) - 400, 500.f);
     generate_dino_noAnimated(dino2, 24, sombra, screenWidth / 2 - MeasureText("Regresar", 90) / 2, 500.f);
@@ -375,7 +406,7 @@ bool CheckMouseOnOptionY(const char *optionText, float fontSize, float position)
     float centerY = screenHeight * position - textSize.y / 2;
 
     Rectangle optionBounds = {centerX, centerY, textSize.x, textSize.y};
-    DrawRectangle(centerX, centerY, textSize.x, textSize.y, GREEN);
+    // DrawRectangle(centerX, centerY, textSize.x, textSize.y, GREEN);
 
     return CheckCollisionPointRec(mousePosition, optionBounds);
 }
@@ -388,7 +419,7 @@ bool CheckMouseOnOptionXandY(const char *optionText, float fontSize, float posit
     float centerY = screenHeight * positionY - textSize.y / 2;
 
     Rectangle optionBounds = {centerX, centerY, textSize.x, textSize.y};
-    DrawRectangle(centerX, centerY, textSize.x, textSize.y, GREEN);
+    // DrawRectangle(centerX, centerY, textSize.x, textSize.y, GREEN);
 
     return CheckCollisionPointRec(mousePosition, optionBounds);
 }
