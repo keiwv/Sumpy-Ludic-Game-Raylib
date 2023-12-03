@@ -194,33 +194,30 @@ void UpdateCustome()
             currentScene = START;
             mostrarMensaje = false;
         }
-        if (/* condition */)
+        if (CheckMouseOnOptionXandY("Espy", 70, 0.5, 0.43)) // verifica que dinosaurio escogio
         {
-            /* code */
+            selectDino = 1;
+            mostrarMensaje = true;
         }
-        else
+        if (CheckMouseOnOptionXandY("Nacky", 70, 1, 0.43))
         {
-            if (CheckMouseOnOptionXandY("Espy", 70, 0.5, 0.43)) // verifica que dinosaurio escogio
-            {
-                selectDino = 1;
-                mostrarMensaje = true;
-            }
-            if (CheckMouseOnOptionXandY("Nacky", 70, 1, 0.43))
-            {
-                selectDino = 2;
-                mostrarMensaje = true;
-            }
-            if (CheckMouseOnOptionXandY("Juan", 80, 1.4, 0.43))
-            {
-                selectDino = 3;
-                mostrarMensaje = true;
-            }
+            selectDino = 2;
+            mostrarMensaje = true;
+        }
+        if (CheckMouseOnOptionXandY("Juan", 80, 1.4, 0.43))
+        {
+            selectDino = 3;
+            mostrarMensaje = true;
         }
     }
 
     if (mostrarMensaje)
     {
         DrawText("LISTO", screenWidth / 2.35 - MeasureText("LISTO", fontSize) / 2, screenHeight / 4, fontSize * 2.0f, BLACK);
+    }
+    else
+    {
+        DrawText("SELECCIONA UN PERSONAJE", screenWidth / 2 - MeasureText("SELECCIONA UN PERSONAJE", 100) / 2, screenHeight * 0.150, 100, BLACK);
     }
 }
 
@@ -230,7 +227,6 @@ void DrawCustome(Texture2D dino, Texture2D dino2, Texture2D dino3, Texture2D som
     ClearBackground(WHITE);
     Color select = {255, 200, 0, 255};
     float fontSize = 80.0f + 10.0f * sinf(GetTime() * 8.0f);
-    DrawText("SELECCIONA UN PERSONAJE", screenWidth / 2 - MeasureText("SELECCIONA UN PERSONAJE", 100) / 2, screenHeight * 0.150, 100, BLACK);
     /******************************   rectangulo negro   **********************************/
     Rectangle rec = {(float)screenWidth / 2 - MeasureText("Regresar", 87) / 2, screenHeight * 0.79, 400, 100};
     Color rectangleColor = {0, 0, 0, 128};
@@ -250,7 +246,8 @@ void DrawCustome(Texture2D dino, Texture2D dino2, Texture2D dino3, Texture2D som
     // X    Y
     if (CheckMouseOnOptionXandY("Espy", 70, 0.5, 0.43))
     {
-        DrawText("Espy", screenWidth / 2 - MeasureText("Espy", 70) / 0.3, screenHeight / 2.5, fontSize, select);
+        DrawText("Espy", screenWidth / 2 - MeasureText("Espy", 70) / 0.3, screenHeight / 2.5, 70, select);
+        //DrawText("Espy", screenWidth / 2 - MeasureText("Espy", 70) / 0.3, screenHeight / 2.5, fontSize, select);
     }
     else
     {
@@ -259,7 +256,8 @@ void DrawCustome(Texture2D dino, Texture2D dino2, Texture2D dino3, Texture2D som
 
     if (CheckMouseOnOptionXandY("Nacky", 70, 1, 0.43))
     {
-        DrawText("Nacky", screenWidth / 2 - MeasureText("Nacky", 70) / 2, screenHeight / 2.5, fontSize, select);
+        DrawText("Nacky", screenWidth / 2 - MeasureText("Nacky", 70) /2, screenHeight / 2.5, 70, select);
+        //DrawText("Nacky", screenWidth / 2 - MeasureText("Nacky", 70) / 2, screenHeight / 2.5, fontSize, select);
     }
     else
     {
@@ -267,7 +265,8 @@ void DrawCustome(Texture2D dino, Texture2D dino2, Texture2D dino3, Texture2D som
     }
     if (CheckMouseOnOptionXandY("Juan", 80, 1.4, 0.43))
     {
-        DrawText("Juan", screenWidth / 1.4 - MeasureText("Juan", 70) / 2, screenHeight / 2.5, fontSize, select);
+        DrawText("Juan", screenWidth / 1.4 - MeasureText("Juan", 70) / 2, screenHeight / 2.5, 70, select);
+        //DrawText("Juan", screenWidth / 1.4 - MeasureText("Juan", 70) / 2, screenHeight / 2.5, fontSize, select);
     }
     else
     {
