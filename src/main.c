@@ -3,6 +3,7 @@
 
 typedef enum
 {
+    LOGO,
     START,
     SELECTGAME,
     OPTIONS,
@@ -10,6 +11,14 @@ typedef enum
     EXIT
 } GameScene;
 
+typedef enum
+{
+    WAITING,
+    LEVEL1,
+    LEVEL2,
+} GameLevel;
+
+GameLevel currentGameLevel = WAITING;
 GameScene currentScene = START;
 Vector2 mousePosition = {0};
 /********************  Variables y constantes globales *************************/
@@ -18,6 +27,10 @@ int selectDino = 0;
 const int screenWidth = 1920;
 const int screenHeight = 1080;
 /********************************** PROTOTIPO DE FUNCIONES ************************************/
+void logoLoading(Texture2D logoTexture, int frameCounter);
+void UpdateSelectGame();
+void MainSelectGame();
+void DrawSelectGame();
 bool CheckMouseOnOptionY(const char *optionText, float fontSize, float position);
 void generate_dinos(int frame, float runningTime, float frameTime, Texture2D dinosaurio, Texture2D sombra, float posX, float posY, int maxFrames);
 void generate_dino_noAnimated(Texture2D dinosaurio, int maxFrames, Texture2D sombra, float posX, float posY);
@@ -46,6 +59,7 @@ void UpdateMenu()
         }
     }
 }
+
 
 void DrawMenu(Texture2D dinosaurio, int frame, float runningTime, float frameTime, Texture2D sombra)
 {
@@ -328,7 +342,7 @@ int main()
     Vector2 postionTexture = {(float)screenWidth / 2 - (float)screenWidth / 2, (float)screenHeight / 2 - (float)screenHeight / 2};
     Vector2 positionZero = {screenWidth / 2 - texture_logo.width / 2, screenHeight / 2 - texture_logo.height * 1.4};
     float dT;
-
+    int frameCounter = 0;
     while (!WindowShouldClose() && !exitProgram)
     {
         mousePosition = GetMousePosition();
@@ -347,6 +361,10 @@ int main()
         /**********************************************************************************************************************/
         switch (currentScene)
         {
+        case LOGO:
+            frameCounter++;
+            logoLoading(texture_logo, frameCounter); // NO MODIFICAR ESTA FUNCIÓN, SOLUCIONARÉ ALGUNOS PROBLEMAS.
+            break;
         case START:
             UpdateMusicStream(music);
             DrawTextureEx(texture_start, postionTexture, 0, 1.0f, WHITE);
@@ -365,11 +383,10 @@ int main()
             DrawTextureEx(texture_custome, postionTexture, 0, 1.0f, WHITE);
             UpdateCustome();
             DrawCustome(dino1, dino4, dino3, sombra);
+            break;
         case SELECTGAME:
             UpdateMusicStream(level1);
-            UpdateGame();
-            DrawGame();
-            break;
+            MainSelectGame();
             break;
         case EXIT:
             exitProgram = true;
@@ -394,6 +411,97 @@ int main()
 
     return 0;
 }
+
+//***************************** LOGO LOADING *****************************
+void logoLoading(Texture2D logoTexture, int frameCounter)
+{
+    float logoOpacity = 0.0f;
+
+    if (frameCounter <= 500)
+    {
+
+        logoOpacity += 1.0f / 60.0f;
+    }
+
+    if (frameCounter > 60 && frameCounter <= 120)
+    {
+        logoOpacity = 1.0f;
+    }
+
+    if (frameCounter > 120 && frameCounter <= 180)
+    {
+
+        logoOpacity -= 1.0f / 60.0f;
+    }
+
+    if (frameCounter > 2000)
+    {
+
+        currentScene = START;
+    }
+
+    BeginDrawing();
+    ClearBackground(GREEN);
+    DrawTexturePro(logoTexture, (Rectangle){0, 0, logoTexture.width, logoTexture.height},
+                   (Rectangle){screenWidth / 2 - logoTexture.width / 2, screenHeight / 2 - logoTexture.height / 2,
+                               logoTexture.width, logoTexture.height},
+                   (Vector2){0, 0}, 0.0f, Fade(WHITE, logoOpacity));
+    EndDrawing();
+}
+
+
+//********************************** SELECCIONAR NIVEL FUNCIONES ****************************************
+void UpdateSelectGame()
+{
+    Rectangle LEVEL1_RECT = {10, 10, 20, 20};
+    Rectangle LEVEL2_RECT = {300, 300, 300, 300};
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+    {
+        if (CheckCollisionPointRec(mousePosition, LEVEL1_RECT))
+        {
+            currentGameLevel = LEVEL1;
+        }
+        if (CheckCollisionPointRec(mousePosition, LEVEL2_RECT))
+        {
+            currentGameLevel = LEVEL2;
+        }
+    }
+}
+
+void MainSelectGame()
+{
+    switch (currentGameLevel)
+    {
+    case WAITING:
+        UpdateSelectGame();
+        DrawSelectGame();
+        break;
+    case LEVEL1:
+        BeginDrawing();
+        ClearBackground(BLACK);
+        EndDrawing();
+        break;
+    case LEVEL2:
+        BeginDrawing();
+        ClearBackground(WHITE);
+        EndDrawing();
+        break;
+    }
+}
+
+void DrawSelectGame()
+{
+    // AQUI PUEDES MODIFICAR TODO LO RELACIONADO CON EL SELECCIONAR NIVEL (DECORARLO). LOS RENCTÁNGULOS SON GUÍAS. PARA MOPDIFICAR LA POSICIÓN, DEBEN COINCIDIR LOS VALORES
+    // DEL RECTANGULO DE ESTA FUNCIÓN LAS DE RECTANGULO EN LA FUNCION "UpdateSelectGame()". RECUERDA VER QUE DATOS TIENE LA ESTRUCTURA RECTANGLE.
+    Rectangle LEVEL1_RECT = {10, 10, 20, 20}; 
+    Rectangle LEVEL2_RECT = {300, 300, 300, 300}; 
+    BeginDrawing();
+    ClearBackground(PURPLE);
+    DrawRectangleRec(LEVEL1_RECT, WHITE);
+    DrawRectangleRec(LEVEL2_RECT, BLACK);
+    EndDrawing();
+}
+
 
 /********************************** DESARROLLO DE FUNCIONES ************************************/
 
