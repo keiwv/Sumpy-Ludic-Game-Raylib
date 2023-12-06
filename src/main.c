@@ -1,6 +1,8 @@
 #include "raylib.h"
-#include <math.h>
-#include "../include/usefulFunctions.h"
+#include "math.h"
+#include <stdio.h>
+#include <time.h>
+#include <stdlib.h>
 typedef enum
 {
     LOGO,
@@ -36,13 +38,14 @@ void logoLoading(Texture2D logoTexture, int frameCounter);
 
 void UpdateMenu();
 void DrawMenu();
+int getRandomNumber(int ri, int rf);
 
 void UpdateSelectGame();
-void MainSelectGame();
+void MainSelectGame(int gameMatrix[][MATRIX_WIDTH]);
 void DrawSelectGame();
 
-void UpdateGameLv1();
-void DrawGameLv1();
+void UpdateGameLv1(int gameMatrix[][MATRIX_WIDTH]);
+void DrawGameLv1(int gameMatrix[][MATRIX_WIDTH]);
 
 bool CheckMouseOnOption(const char *optionText, float fontSize, float position);
 
@@ -55,6 +58,16 @@ int main()
     Texture2D logoTexture = LoadTexture("resources/logo2.png");
     Image icon = LoadImage("resources/icon.png");
     SetWindowIcon(icon);
+
+    int gameMatrix[MATRIX_HEIGHT][MATRIX_WIDTH];
+    for (int i = 0; i < MATRIX_HEIGHT; i++)
+    {
+        for (int j = 0; j < MATRIX_WIDTH; j++)
+        {
+            gameMatrix[i][j] = getRandomNumber(1, 10);
+        }
+    }
+
     while (!WindowShouldClose() && !exitProgram)
     {
         mousePosition = GetMousePosition();
@@ -70,7 +83,7 @@ int main()
             DrawMenu();
             break;
         case SELECTGAME:
-            MainSelectGame();
+            MainSelectGame(gameMatrix);
             break;
         case OPTIONS:
             break;
@@ -209,28 +222,23 @@ void UpdateSelectGame()
     }
 }
 
-void MainSelectGame()
+void MainSelectGame(int gameMatrix[][MATRIX_WIDTH])
 {
-    int flagNumberGen = 0;
-    do
+    switch (currentGameLevel)
     {
-        switch (currentGameLevel)
-        {
-        case WAITING:
-            UpdateSelectGame();
-            DrawSelectGame();
-            break;
-        case LEVEL1:
-            UpdateGameLv1(flagNumberGen);
-            flagNumberGen = 1;
-            break;
-        case LEVEL2:
-            BeginDrawing();
-            ClearBackground(WHITE);
-            EndDrawing();
-            break;
-        }
-    } while (1);
+    case WAITING:
+        UpdateSelectGame();
+        DrawSelectGame();
+        break;
+    case LEVEL1:
+        UpdateGameLv1(gameMatrix);
+        break;
+    case LEVEL2:
+        BeginDrawing();
+        ClearBackground(WHITE);
+        EndDrawing();
+        break;
+    }
 }
 
 void DrawSelectGame()
@@ -245,27 +253,24 @@ void DrawSelectGame()
 }
 
 //************* GAME *******************
-void UpdateGameLv1()
+void UpdateGameLv1(int gameMatrix[][MATRIX_WIDTH])
 {
-    int gameMatrix[MATRIX_HEIGHT][MATRIX_WIDTH];
-
-    for (int i = 0; i < MATRIX_HEIGHT; i++)
-    {
-        for (int j = 0; i < MATRIX_WIDTH; i++)
-        {
-            gameMatrix[i][j] = getRandomNumber(1, 20);
-        }
-    }
-
-    DrawGameLv1();
+    DrawGameLv1(gameMatrix);
 }
 
-void DrawGameLv1()
+void DrawGameLv1(int gameMatrix[][MATRIX_WIDTH])
 {
     int matrixX = 400 + (screenWidth - MATRIX_WIDTH * (RECTANGLE_SIZE + 10)) / 2;
     int matrixY = (screenHeight - MATRIX_HEIGHT * (RECTANGLE_SIZE + 10)) / 2;
     BeginDrawing();
     ClearBackground(BLACK);
+    char number[4];
+
+    int x = 0;
+    int y = 0;
+
+    float textY;
+    float textX;
 
     Rectangle rectangulo;
     rectangulo.height = RECTANGLE_SIZE;
@@ -279,32 +284,47 @@ void DrawGameLv1()
         {
             rectangulo.x = matrixX + j * (RECTANGLE_SIZE + 10);
             rectangulo.y = matrixY + i * (RECTANGLE_SIZE + 10);
-
+            snprintf(number, sizeof(number), "%d", gameMatrix[i][j]);
             if (CheckCollisionPointRec(GetMousePosition(), rectangulo))
             {
                 enlargedRect = rectangulo;
+                x = i;
+                y = j;
             }
             else
             {
+                textX = rectangulo.x + (RECTANGLE_SIZE - MeasureText(number, 50)) / 2;
+                textY = rectangulo.y + (RECTANGLE_SIZE - 50) / 2;
                 DrawRectangleRounded(rectangulo, 0.4, 0, RED);
                 DrawRectangleRoundedLines(rectangulo, 0.4, 20, 2, WHITE);
+                DrawText(number, textX, textY, 50, WHITE);
             }
         }
     }
 
     if (enlargedRect.width > 0)
     {
-        enlargedRect.x -= 20 + 20 / 2 * sinf(GetTime() * 4.0f);
-        enlargedRect.y -= 20 + 20 / 2 * sinf(GetTime() * 4.0f);
-        enlargedRect.width += 40 + 40 / 2 * sinf(GetTime() * 4.0f);
-        enlargedRect.height += 40 + 40 / 2 * sinf(GetTime() * 4.0f);
+        float getTime = sinf(GetTime() * 8.0f);
+        enlargedRect.x -= 20 + 20 / 2 * getTime;
+        enlargedRect.y -= 20 + 20 / 2 * getTime;
+        enlargedRect.width += 40 + 40 / 2 * getTime;
+        enlargedRect.height += 40 + 40 / 2 * getTime;
+
 
         DrawRectangleRounded(enlargedRect, 0.4, 0, BLUE);
         DrawRectangleRoundedLines(enlargedRect, 0.4, 20, 2, WHITE);
+
+        snprintf(number, sizeof(number), "%d", gameMatrix[x][y]);
+
+        textX = enlargedRect.x + (enlargedRect.width - MeasureText(number, (float)(60+ 50*getTime/2))) / 2;
+        textY = enlargedRect.y + (enlargedRect.height - (float)(60+ 50*getTime/2)) / 2;
+
+        DrawText(number, textX, textY, (float)(60+ 50*getTime/2), WHITE);
     }
 
     EndDrawing();
 }
+
 //************* USEFUL FUNCTIONS ****************************
 bool CheckMouseOnOption(const char *optionText, float fontSize, float position)
 {
@@ -314,4 +334,10 @@ bool CheckMouseOnOption(const char *optionText, float fontSize, float position)
 
     Rectangle optionBounds = {centerX, centerY, textSize.x, textSize.y};
     return CheckCollisionPointRec(mousePosition, optionBounds);
+}
+
+int getRandomNumber(int ri, int rf)
+{
+    int range = (rf - ri + 1);
+    return rand() % range + ri;
 }
