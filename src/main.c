@@ -22,6 +22,7 @@ GameLevel currentGameLevel = WAITING;
 GameScene currentScene = START;
 Vector2 mousePosition = {0};
 /********************  Variables y constantes globales *************************/
+Sound sound1;
 bool waiting = true;
 int selectDino = 0;
 const int screenWidth = 1920;
@@ -37,7 +38,7 @@ void generate_dino_noAnimated(Texture2D dinosaurio, int maxFrames, Texture2D som
 void generte_rec(void);
 bool CheckMouseOnOptionXandY(const char *optionText, float fontSize, float positionX, float positionY);
 /************************************************************************************************/
-void UpdateMenu(Sound sound1)
+void UpdateMenu()
 {
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
     {
@@ -52,10 +53,12 @@ void UpdateMenu(Sound sound1)
         }
         if (CheckMouseOnOptionY("Personaje", 70, 0.615))
         {
+            PlaySound(sound1);
             currentScene = CUSTOME;
         }
         if (CheckMouseOnOptionY("Salir", 70, 0.78))
         {
+            PlaySound(sound1);
             currentScene = EXIT;
         }
     }
@@ -120,6 +123,7 @@ void UpdateOptions(Music music)
     {
         if (CheckMouseOnOptionY("Regresar", 70, 0.78))
         {
+            PlaySound(sound1);
             currentScene = START;
         }
         if (CheckMouseOnOptionY("Silenciar musica", 70, 0.615))
@@ -205,6 +209,7 @@ void UpdateCustome()
     {
         if (CheckMouseOnOptionY("Regresar", 70, 0.84))
         {
+            PlaySound(sound1);
             currentScene = START;
             mostrarMensaje = false;
         }
@@ -306,7 +311,7 @@ int main()
     PlayMusicStream(music);
     PlayMusicStream(level1);
     /*********************************** SONIDOS ***********************************/
-    Sound sound1 = LoadSound("build\\audios_danna\\sonido-menu.wav");
+    sound1 = LoadSound("sumpy-ludic-game-raylib\\build\\audios_danna\\sonido-menu.wav");
     /**************************** Background OPTIONS  ******************************/
     Image background_options = LoadImage("imagenes_danna\\background_verde.png");
     ImageResize(&background_options, screenWidth, screenHeight);
@@ -369,7 +374,7 @@ int main()
             UpdateMusicStream(music);
             DrawTextureEx(texture_start, postionTexture, 0, 1.0f, WHITE);
             DrawTextureEx(texture_logo, positionZero, 0, 1.0f, WHITE);
-            UpdateMenu(sound1);
+            UpdateMenu();
             DrawMenu(dino1, frame, runningTime, frameTime, sombra);
             break;
         case OPTIONS:
@@ -393,7 +398,6 @@ int main()
             break;
         }
     }
-    UnloadSound(sound1);
     UnloadTexture(texture_custome);
     UnloadTexture(sombra);
     UnloadTexture(dino1);
@@ -404,6 +408,7 @@ int main()
     UnloadTexture(texture_start);
     UnloadTexture(texture_options);
 
+    UnloadSound(sound1);
     UnloadMusicStream(level1);
     UnloadMusicStream(music);
     CloseAudioDevice();
