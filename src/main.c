@@ -1,6 +1,6 @@
 #include "raylib.h"
 #include <math.h>
-
+#include "../include/usefulFunctions.h"
 typedef enum
 {
     LOGO,
@@ -18,13 +18,13 @@ typedef enum
     LEVEL2,
 } GameLevel;
 
-GameScene currentScene = MENU;
-GameLevel currentGameLevel = WAITING;
+GameScene currentScene = SELECTGAME;
+GameLevel currentGameLevel = LEVEL1;
 
 Vector2 mousePosition = {0};
 bool waiting = true;
 
-#define MATRIX_WIDTH 6
+#define MATRIX_WIDTH 9
 #define MATRIX_HEIGHT 7
 #define RECTANGLE_SIZE 100
 
@@ -41,13 +41,14 @@ void UpdateSelectGame();
 void MainSelectGame();
 void DrawSelectGame();
 
-void UpdateGame();
-void DrawGame();
+void UpdateGameLv1();
+void DrawGameLv1();
 
 bool CheckMouseOnOption(const char *optionText, float fontSize, float position);
 
 int main()
 {
+    srand(time(NULL));
     InitWindow(screenWidth, screenHeight, "Sumpy");
     bool exitProgram = false;
     int frameCounter = 0;
@@ -210,23 +211,26 @@ void UpdateSelectGame()
 
 void MainSelectGame()
 {
-    switch (currentGameLevel)
+    int flagNumberGen = 0;
+    do
     {
-    case WAITING:
-        UpdateSelectGame();
-        DrawSelectGame();
-        break;
-    case LEVEL1:
-        BeginDrawing();
-        ClearBackground(BLACK);
-        EndDrawing();
-        break;
-    case LEVEL2:
-        BeginDrawing();
-        ClearBackground(WHITE);
-        EndDrawing();
-        break;
-    }
+        switch (currentGameLevel)
+        {
+        case WAITING:
+            UpdateSelectGame();
+            DrawSelectGame();
+            break;
+        case LEVEL1:
+            UpdateGameLv1(flagNumberGen);
+            flagNumberGen = 1;
+            break;
+        case LEVEL2:
+            BeginDrawing();
+            ClearBackground(WHITE);
+            EndDrawing();
+            break;
+        }
+    } while (1);
 }
 
 void DrawSelectGame()
@@ -241,35 +245,64 @@ void DrawSelectGame()
 }
 
 //************* GAME *******************
-void UpdateGame()
+void UpdateGameLv1()
 {
-    DrawGame();
+    int gameMatrix[MATRIX_HEIGHT][MATRIX_WIDTH];
+
+    for (int i = 0; i < MATRIX_HEIGHT; i++)
+    {
+        for (int j = 0; i < MATRIX_WIDTH; i++)
+        {
+            gameMatrix[i][j] = getRandomNumber(1, 20);
+        }
+    }
+
+    DrawGameLv1();
 }
 
-void DrawGame()
+void DrawGameLv1()
 {
+    int matrixX = 400 + (screenWidth - MATRIX_WIDTH * (RECTANGLE_SIZE + 10)) / 2;
+    int matrixY = (screenHeight - MATRIX_HEIGHT * (RECTANGLE_SIZE + 10)) / 2;
     BeginDrawing();
     ClearBackground(BLACK);
 
-    int matrixX = 600 + (screenWidth - MATRIX_WIDTH * (RECTANGLE_SIZE + 10)) / 2;
-    int matrixY = (screenHeight - MATRIX_HEIGHT * (RECTANGLE_SIZE + 10)) / 2;
-
     Rectangle rectangulo;
+    rectangulo.height = RECTANGLE_SIZE;
+    rectangulo.width = RECTANGLE_SIZE;
+
+    Rectangle enlargedRect = {0};
+
     for (int i = 0; i < MATRIX_HEIGHT; i++)
     {
         for (int j = 0; j < MATRIX_WIDTH; j++)
         {
-            rectangulo.height = RECTANGLE_SIZE;
-            rectangulo.width = RECTANGLE_SIZE;
             rectangulo.x = matrixX + j * (RECTANGLE_SIZE + 10);
             rectangulo.y = matrixY + i * (RECTANGLE_SIZE + 10);
-            DrawRectangleRounded(rectangulo, 0.4, 0, RED);
-            DrawRectangleRoundedLines(rectangulo, 0.4, 20, 2, WHITE);
+
+            if (CheckCollisionPointRec(GetMousePosition(), rectangulo))
+            {
+                enlargedRect = rectangulo;
+            }
+            else
+            {
+                DrawRectangleRounded(rectangulo, 0.4, 0, RED);
+                DrawRectangleRoundedLines(rectangulo, 0.4, 20, 2, WHITE);
+            }
         }
     }
 
-    DrawRectangleLines(screenHeight / 10, screenWidth / 2, 300, 200, RED);
-    DrawRectangleLines(50, 50, 1200, 200, BLUE);
+    if (enlargedRect.width > 0)
+    {
+        enlargedRect.x -= 20 + 20 / 2 * sinf(GetTime() * 4.0f);
+        enlargedRect.y -= 20 + 20 / 2 * sinf(GetTime() * 4.0f);
+        enlargedRect.width += 40 + 40 / 2 * sinf(GetTime() * 4.0f);
+        enlargedRect.height += 40 + 40 / 2 * sinf(GetTime() * 4.0f);
+
+        DrawRectangleRounded(enlargedRect, 0.4, 0, BLUE);
+        DrawRectangleRoundedLines(enlargedRect, 0.4, 20, 2, WHITE);
+    }
+
     EndDrawing();
 }
 //************* USEFUL FUNCTIONS ****************************
