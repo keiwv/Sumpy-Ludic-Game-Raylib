@@ -27,6 +27,8 @@ bool waiting = true;
 int selectDino = 0;
 const int screenWidth = 1920;
 const int screenHeight = 1080;
+static bool musicPaused = false;
+static bool soundPaused = true;
 /********************************** PROTOTIPO DE FUNCIONES ************************************/
 void logoLoading(Texture2D logoTexture, int frameCounter);
 void UpdateSelectGame();
@@ -37,6 +39,7 @@ void generate_dinos(int frame, float runningTime, float frameTime, Texture2D din
 void generate_dino_noAnimated(Texture2D dinosaurio, int maxFrames, Texture2D sombra, float posX, float posY);
 void generte_rec(void);
 bool CheckMouseOnOptionXandY(const char *optionText, float fontSize, float positionX, float positionY);
+void playsound(Sound sonido, bool flag);
 /************************************************************************************************/
 void UpdateMenu()
 {
@@ -44,21 +47,22 @@ void UpdateMenu()
     {
         if (CheckMouseOnOptionY("Seleccionar nivel", 70, 0.532))
         {
+            playsound(sound1, soundPaused);
             currentScene = SELECTGAME;
         }
         if (CheckMouseOnOptionY("Opciones", 70, 0.697))
         {
-            PlaySound(sound1);
+            playsound(sound1, soundPaused);
             currentScene = OPTIONS;
         }
         if (CheckMouseOnOptionY("Personaje", 70, 0.615))
         {
-            PlaySound(sound1);
+            playsound(sound1, soundPaused);
             currentScene = CUSTOME;
         }
         if (CheckMouseOnOptionY("Salir", 70, 0.78))
         {
-            PlaySound(sound1);
+            playsound(sound1, soundPaused);
             currentScene = EXIT;
         }
     }
@@ -118,25 +122,41 @@ void DrawMenu(Texture2D dinosaurio, int frame, float runningTime, float frameTim
 void UpdateOptions(Music music)
 {
     // Lógica de actualización de opciones
-    bool stopMusic = false;
+
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
     {
         if (CheckMouseOnOptionY("Regresar", 70, 0.78))
         {
-            PlaySound(sound1);
+            playsound(sound1, soundPaused);
             currentScene = START;
         }
-        if (CheckMouseOnOptionY("Silenciar musica", 70, 0.615))
+        if (CheckMouseOnOptionY("Musica", 70, 0.650))
         {
-            if (!stopMusic)
+            playsound(sound1, soundPaused);
+            if (musicPaused)
+            {
+                ResumeMusicStream(music);
+                musicPaused = false;
+            }
+            else
             {
                 PauseMusicStream(music);
+                musicPaused = true;
             }
         }
-        if (CheckMouseOnOptionY("Activar musica", 70, 0.697))
+        if (CheckMouseOnOptionY("Efectos", 70, 0.532))
         {
-            ResumeMusicStream(music);
-            stopMusic = true;
+            if (soundPaused)
+            {
+                ResumeSound(sound1);
+                soundPaused = false;
+            }
+            else
+            {
+                PauseSound(sound1);
+                soundPaused = true;
+                playsound(sound1, soundPaused);
+            }
         }
     }
 }
@@ -153,32 +173,42 @@ void DrawOptions(Texture2D dinosaurio, int frame, float runningTime, float frame
     /**************************** GENERAR DINOSAURIO  *******************************/
     generate_dinos(frame, runningTime, frameTime, dinosaurio, sombra, screenWidth / 1.35, screenHeight / 2, 24, 1);
     /********************************************************************************/
-    if (CheckMouseOnOptionY("Efectos de sonido", 70, 0.532))
+    if (CheckMouseOnOptionY("Efectos", 70, 0.532))
     {
-        DrawText("Efectos de sonido", screenWidth / 2 - MeasureText("Efectos de sonido", fontSize) / 2, screenHeight / 2, fontSize, select);
+        DrawText("Efectos", screenWidth / 2.099 - MeasureText("Efectos", fontSize) / 2, screenHeight / 2, fontSize, select);
     }
     else
     {
-        DrawText("Efectos de sonido", screenWidth / 2 - MeasureText("Efectos de sonido", 70) / 2, screenHeight / 2, 70, WHITE);
+        DrawText("Efectos", screenWidth / 2.099 - MeasureText("Efectos", 70) / 2, screenHeight / 2, 70, WHITE);
+    }
+    if (soundPaused)
+    {
+        DrawText("ON", screenWidth / 1.559 - MeasureText("Efectos", 70) / 2, screenHeight / 2, 70, WHITE);
+    }
+    else
+    {
+        DrawText("OFF", screenWidth / 1.559 - MeasureText("Efectos", 70) / 2, screenHeight / 2, 70, select);
     }
 
-    if (CheckMouseOnOptionY("Silenciar musica", 70, 0.615))
+    if (CheckMouseOnOptionY("Musica", 75, 0.655))
     {
-        DrawText("Silenciar musica", screenWidth / 2 - MeasureText("Silenciar musica", fontSize) / 2, screenHeight * 0.5905, fontSize, WHITE);
+        DrawText("Musica", screenWidth / 2.1 - MeasureText("Musica", fontSize) / 2, screenHeight * 0.630, fontSize, WHITE);
     }
     else
     {
-        DrawText("Silenciar musica", screenWidth / 2 - MeasureText("Silenciar musica", 70) / 2, screenHeight * 0.5905, 70, WHITE);
+        DrawText("Musica", screenWidth / 2.1 - MeasureText("Musica", 70) / 2, screenHeight * 0.630, 70, WHITE);
+    }
+    if (musicPaused)
+    {
+        DrawText("OFF", screenWidth / 1.6 - MeasureText("Musica", 70) / 2, screenHeight * 0.630, 70, select);
+    }
+    else
+    {
+        DrawText("ON", screenWidth / 1.6 - MeasureText("Musica", 70) / 2, screenHeight * 0.630, 70, WHITE);
     }
 
-    if (CheckMouseOnOptionY("Activar musica", 70, 0.697))
-    {
-        DrawText("Activar musica", screenWidth / 2 - MeasureText("Activar musica", fontSize) / 2, screenHeight * 0.67545, fontSize, select);
-    }
-    else
-    {
-        DrawText("Activar musica", screenWidth / 2 - MeasureText("Activar musica", 70) / 2, screenHeight * 0.67545, 70, WHITE);
-    }
+    // DrawText(musicPaused ? "OFF" : "ON", screenWidth / 1.6 - MeasureText("Musica", 70) / 2, screenHeight * 0.630, 70, select);
+
     if (CheckMouseOnOptionY("Regresar", 70, 0.78))
     {
         DrawText("Regresar", screenWidth / 2 - MeasureText("Regresar", fontSize) / 2, screenHeight * 0.755, fontSize, select);
@@ -209,7 +239,7 @@ void UpdateCustome()
     {
         if (CheckMouseOnOptionY("Regresar", 70, 0.84))
         {
-            PlaySound(sound1);
+            playsound(sound1, soundPaused);
             currentScene = START;
             mostrarMensaje = false;
         }
@@ -311,7 +341,7 @@ int main()
     PlayMusicStream(music);
     PlayMusicStream(level1);
     /*********************************** SONIDOS ***********************************/
-    sound1 = LoadSound("sumpy-ludic-game-raylib\\build\\audios_danna\\sonido-menu.wav");
+    sound1 = LoadSound("audios_danna\\sonido-menu.wav");
     /**************************** Background OPTIONS  ******************************/
     Image background_options = LoadImage("imagenes_danna\\background_verde.png");
     ImageResize(&background_options, screenWidth, screenHeight);
@@ -508,6 +538,14 @@ void DrawSelectGame()
 }
 
 /********************************** DESARROLLO DE FUNCIONES ************************************/
+
+void playsound(Sound sonido, bool flag)
+{
+    if (flag)
+    {
+        PlaySound(sonido);
+    }
+}
 
 bool CheckMouseOnOptionY(const char *optionText, float fontSize, float position)
 {
