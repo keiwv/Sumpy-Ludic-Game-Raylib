@@ -32,12 +32,12 @@ void UpdateSelectGame();
 void MainSelectGame();
 void DrawSelectGame();
 bool CheckMouseOnOptionY(const char *optionText, float fontSize, float position);
-void generate_dinos(int frame, float runningTime, float frameTime, Texture2D dinosaurio, Texture2D sombra, float posX, float posY, int maxFrames);
+void generate_dinos(int frame, float runningTime, float frameTime, Texture2D dinosaurio, Texture2D sombra, float posX, float posY, int maxFrames, int op);
 void generate_dino_noAnimated(Texture2D dinosaurio, int maxFrames, Texture2D sombra, float posX, float posY);
 void generte_rec(void);
 bool CheckMouseOnOptionXandY(const char *optionText, float fontSize, float positionX, float positionY);
 /************************************************************************************************/
-void UpdateMenu()
+void UpdateMenu(Sound sound1)
 {
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
     {
@@ -47,6 +47,7 @@ void UpdateMenu()
         }
         if (CheckMouseOnOptionY("Opciones", 70, 0.697))
         {
+            PlaySound(sound1);
             currentScene = OPTIONS;
         }
         if (CheckMouseOnOptionY("Personaje", 70, 0.615))
@@ -60,7 +61,6 @@ void UpdateMenu()
     }
 }
 
-
 void DrawMenu(Texture2D dinosaurio, int frame, float runningTime, float frameTime, Texture2D sombra)
 {
     /**************************************** DISEñO DE MENU ********************************************/
@@ -72,7 +72,7 @@ void DrawMenu(Texture2D dinosaurio, int frame, float runningTime, float frameTim
     generte_rec();
     /****************************************** DINOSAURIO  **********************************************/
     int maxFrames = 24;
-    generate_dinos(frame, runningTime, frameTime, dinosaurio, sombra, (float)screenWidth / 8, (float)screenHeight / 1.6, maxFrames);
+    generate_dinos(frame, runningTime, frameTime, dinosaurio, sombra, (float)screenWidth / 12, (float)screenHeight / 1.9, maxFrames, 1);
     /*****************************************************************************************************/
     if (CheckMouseOnOptionY("Selecciona un nivel", 70, 0.532))
     {
@@ -129,7 +129,7 @@ void UpdateOptions(Music music)
                 PauseMusicStream(music);
             }
         }
-        if (CheckMouseOnOptionY("Personaje", 70, 0.697))
+        if (CheckMouseOnOptionY("Activar musica", 70, 0.697))
         {
             ResumeMusicStream(music);
             stopMusic = true;
@@ -147,7 +147,7 @@ void DrawOptions(Texture2D dinosaurio, int frame, float runningTime, float frame
     /******************************* GENERAR RECTANGULO ******************************/
     generte_rec();
     /**************************** GENERAR DINOSAURIO  *******************************/
-    generate_dinos(frame, runningTime, frameTime, dinosaurio, sombra, screenWidth / 1.35, screenHeight / 2, 24);
+    generate_dinos(frame, runningTime, frameTime, dinosaurio, sombra, screenWidth / 1.35, screenHeight / 2, 24, 1);
     /********************************************************************************/
     if (CheckMouseOnOptionY("Efectos de sonido", 70, 0.532))
     {
@@ -235,7 +235,7 @@ void UpdateCustome()
     }
 }
 
-void DrawCustome(Texture2D dino, Texture2D dino2, Texture2D dino3, Texture2D sombra)
+void DrawCustome(Texture2D dino, Texture2D dino2, Texture2D dino3, Texture2D sombra, int frame, float runningTime, float frameTime)
 {
     BeginDrawing();
     ClearBackground(WHITE);
@@ -261,36 +261,34 @@ void DrawCustome(Texture2D dino, Texture2D dino2, Texture2D dino3, Texture2D som
     if (CheckMouseOnOptionXandY("Espy", 70, 0.5, 0.43))
     {
         DrawText("Espy", screenWidth / 2 - MeasureText("Espy", 70) / 0.3, screenHeight / 2.5, 70, select);
-        //DrawText("Espy", screenWidth / 2 - MeasureText("Espy", 70) / 0.3, screenHeight / 2.5, fontSize, select);
+        generate_dinos(frame, runningTime, frameTime, dino, sombra, (screenWidth / 2 - MeasureText("Regresar", 90) / 2) - 400, 500.f, 24, 0);
     }
     else
     {
         DrawText("Espy", screenWidth / 2 - MeasureText("Espy", 70) / 0.3, screenHeight / 2.5, 70, WHITE);
+        generate_dino_noAnimated(dino, 24, sombra, (screenWidth / 2 - MeasureText("Regresar", 90) / 2) - 400, 500.f);
     }
 
     if (CheckMouseOnOptionXandY("Nacky", 70, 1, 0.43))
     {
-        DrawText("Nacky", screenWidth / 2 - MeasureText("Nacky", 70) /2, screenHeight / 2.5, 70, select);
-        //DrawText("Nacky", screenWidth / 2 - MeasureText("Nacky", 70) / 2, screenHeight / 2.5, fontSize, select);
+        DrawText("Nacky", screenWidth / 2 - MeasureText("Nacky", 70) / 2, screenHeight / 2.5, 70, select);
+        generate_dinos(frame, runningTime, frameTime, dino2, sombra, screenWidth / 2 - MeasureText("Regresar", 90) / 2, 500.f, 24, 0);
     }
     else
     {
         DrawText("Nacky", screenWidth / 2 - MeasureText("Nacky", 70) / 2, screenHeight / 2.5, 70, WHITE);
+        generate_dino_noAnimated(dino2, 24, sombra, screenWidth / 2 - MeasureText("Regresar", 90) / 2, 500.f);
     }
     if (CheckMouseOnOptionXandY("Juan", 80, 1.4, 0.43))
     {
         DrawText("Juan", screenWidth / 1.4 - MeasureText("Juan", 70) / 2, screenHeight / 2.5, 70, select);
-        //DrawText("Juan", screenWidth / 1.4 - MeasureText("Juan", 70) / 2, screenHeight / 2.5, fontSize, select);
+        generate_dinos(frame, runningTime, frameTime, dino3, sombra, (screenWidth / 2 - MeasureText("Regresar", 90) / 2) + 400, 500, 24, 0);
     }
     else
     {
         DrawText("Juan", screenWidth / 1.4 - MeasureText("Juan", 70) / 2, screenHeight / 2.5, 70, WHITE);
+        generate_dino_noAnimated(dino3, 24, sombra, (screenWidth / 2 - MeasureText("Regresar", 90) / 2) + 400, 500.f);
     }
-    /***********************  Dibujar dinosaurios  ***************************/
-    generate_dino_noAnimated(dino, 24, sombra, (screenWidth / 2 - MeasureText("Regresar", 90) / 2) - 400, 500.f);
-    generate_dino_noAnimated(dino2, 24, sombra, screenWidth / 2 - MeasureText("Regresar", 90) / 2, 500.f);
-    generate_dino_noAnimated(dino3, 24, sombra, (screenWidth / 2 - MeasureText("Regresar", 90) / 2) + 400, 500.f);
-    /************************************************************************/
     EndDrawing();
 }
 
@@ -307,6 +305,8 @@ int main()
     Music level1 = LoadMusicStream("audios_danna\\LEVEL_.mp3");
     PlayMusicStream(music);
     PlayMusicStream(level1);
+    /*********************************** SONIDOS ***********************************/
+    Sound sound1 = LoadSound("build\\audios_danna\\sonido-menu.wav");
     /**************************** Background OPTIONS  ******************************/
     Image background_options = LoadImage("imagenes_danna\\background_verde.png");
     ImageResize(&background_options, screenWidth, screenHeight);
@@ -369,7 +369,7 @@ int main()
             UpdateMusicStream(music);
             DrawTextureEx(texture_start, postionTexture, 0, 1.0f, WHITE);
             DrawTextureEx(texture_logo, positionZero, 0, 1.0f, WHITE);
-            UpdateMenu();
+            UpdateMenu(sound1);
             DrawMenu(dino1, frame, runningTime, frameTime, sombra);
             break;
         case OPTIONS:
@@ -382,7 +382,7 @@ int main()
             UpdateMusicStream(music);
             DrawTextureEx(texture_custome, postionTexture, 0, 1.0f, WHITE);
             UpdateCustome();
-            DrawCustome(dino1, dino4, dino3, sombra);
+            DrawCustome(dino1, dino4, dino3, sombra, frame, runningTime, frameTime);
             break;
         case SELECTGAME:
             UpdateMusicStream(level1);
@@ -393,6 +393,7 @@ int main()
             break;
         }
     }
+    UnloadSound(sound1);
     UnloadTexture(texture_custome);
     UnloadTexture(sombra);
     UnloadTexture(dino1);
@@ -449,7 +450,6 @@ void logoLoading(Texture2D logoTexture, int frameCounter)
     EndDrawing();
 }
 
-
 //********************************** SELECCIONAR NIVEL FUNCIONES ****************************************
 void UpdateSelectGame()
 {
@@ -493,15 +493,14 @@ void DrawSelectGame()
 {
     // AQUI PUEDES MODIFICAR TODO LO RELACIONADO CON EL SELECCIONAR NIVEL (DECORARLO). LOS RENCTÁNGULOS SON GUÍAS. PARA MOPDIFICAR LA POSICIÓN, DEBEN COINCIDIR LOS VALORES
     // DEL RECTANGULO DE ESTA FUNCIÓN LAS DE RECTANGULO EN LA FUNCION "UpdateSelectGame()". RECUERDA VER QUE DATOS TIENE LA ESTRUCTURA RECTANGLE.
-    Rectangle LEVEL1_RECT = {10, 10, 20, 20}; 
-    Rectangle LEVEL2_RECT = {300, 300, 300, 300}; 
+    Rectangle LEVEL1_RECT = {10, 10, 20, 20};
+    Rectangle LEVEL2_RECT = {300, 300, 300, 300};
     BeginDrawing();
     ClearBackground(PURPLE);
     DrawRectangleRec(LEVEL1_RECT, WHITE);
     DrawRectangleRec(LEVEL2_RECT, BLACK);
     EndDrawing();
 }
-
 
 /********************************** DESARROLLO DE FUNCIONES ************************************/
 
@@ -540,12 +539,19 @@ void generate_dino_noAnimated(Texture2D dinosaurio, int maxFrames, Texture2D som
     DrawTexturePro(dinosaurio, source, dest, origin, 0.f, WHITE);
 }
 
-void generate_dinos(int frame, float runningTime, float frameTime, Texture2D dinosaurio, Texture2D sombra, float posX, float posY, int maxFrames)
+void generate_dinos(int frame, float runningTime, float frameTime, Texture2D dinosaurio, Texture2D sombra, float posX, float posY, int maxFrames, int op)
 {
-    Rectangle dest = {posX, posY, 10 * (float)dinosaurio.width / maxFrames, 10 * (float)dinosaurio.height};
+    Rectangle dest = {posX, posY, 15 * (float)dinosaurio.width / maxFrames, 15 * (float)dinosaurio.height};
     Rectangle source = {frame * (float)dinosaurio.width / maxFrames, 0.f, (float)dinosaurio.width / maxFrames, (float)dinosaurio.height};
     Vector2 origin = {0.f, 0.f};
-    DrawTexture(sombra, posX, posY / 0.950, WHITE);
+    if (op)
+    {
+        DrawTexture(sombra, posX + 115, posY / 0.800, WHITE);
+    }
+    else
+    {
+        DrawTexture(sombra, posX + 30, 640, WHITE);
+    }
     DrawTexturePro(dinosaurio, source, dest, origin, 0.f, WHITE);
 }
 
