@@ -17,6 +17,7 @@ typedef enum
     WAITING,
     LEVEL1,
     LEVEL2,
+    LEAVE
 } GameLevel;
 
 GameLevel currentGameLevel = WAITING;
@@ -37,7 +38,7 @@ bool flagLoadTextures = false;
 void logoLoading(Texture2D logoTexture, int frameCounter);
 void UpdateSelectGame();
 void MainSelectGame(Music menu);
-void DrawSelectGame();
+void DrawSelectGame(Texture2D txt_leve1, Texture2D txt_level2);
 bool CheckMouseOnOptionY(const char *optionText, float fontSize, float position);
 void generate_dinos(int frame, float runningTime, float frameTime, Texture2D dinosaurio, Texture2D sombra, float posX, float posY, int maxFrames, int op);
 void generate_dino_noAnimated(Texture2D dinosaurio, int maxFrames, Texture2D sombra, float posX, float posY);
@@ -457,7 +458,7 @@ int main()
 }
 /********************************** DESARROLLO DE FUNCIONES ************************************/
 
-//***************************** LOGO LOADING *****************************
+//***************************** LOGO LOADING *****************************//
 void logoLoading(Texture2D logoTexture, int frameCounter)
 {
     float logoOpacity = 0.0f;
@@ -498,9 +499,10 @@ void logoLoading(Texture2D logoTexture, int frameCounter)
 void UpdateSelectGame()
 {
     Vector2 mousePosition = GetMousePosition();
-    Rectangle LEVEL1_RECT = {screenWidth / 4, screenHeight / 2, 300, 300};
-    Rectangle LEVEL2_RECT = {screenWidth / 1.79, screenHeight / 2, 300, 300};
-    
+    Rectangle LEVEL1_RECT = {screenWidth / 3.5, screenHeight / 2, 235, 250};
+    Rectangle LEVEL2_RECT = {screenWidth / 1.79, screenHeight / 2, 235, 250};
+ 
+
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
     {
         if (CheckCollisionPointRec(mousePosition, LEVEL1_RECT))
@@ -511,6 +513,10 @@ void UpdateSelectGame()
         {
             currentGameLevel = LEVEL2;
         }
+        if (CheckMouseOnOptionXandY("Regresar", 70, screenWidth / 2 - MeasureText("Regresar", 70) / 2, screenHeight * 0.860))
+        {
+            currentGameLevel = LEAVE;
+        }
     }
 }
 
@@ -518,11 +524,15 @@ void MainSelectGame(Music menu)
 {
     // AQUI PUEDES MODIFICAR TODO LO RELACIONADO CON EL SELECCIONAR NIVEL (DECORARLO). LOS RENCTÁNGULOS SON GUÍAS. PARA MOPDIFICAR LA POSICIÓN, DEBEN COINCIDIR LOS VALORES
     // DEL RECTANGULO DE ESTA FUNCIÓN LAS DE RECTANGULO EN LA FUNCION "UpdateSelectGame()". RECUERDA VER QUE DATOS TIENE LA ESTRUCTURA RECTANGLE.
+    bool salir = false;
     /************************ Background SELECTGAME ******************************/
     Image background_selectgame = LoadImage("imagenes_danna\\background_selectgame.png");
     ImageResize(&background_selectgame, screenWidth, screenHeight);
     Texture2D texture_selectgame = LoadTextureFromImage(background_selectgame);
     UnloadImage(background_selectgame);
+    /***************************  Imagenes de niveles *******************************/
+    Texture2D level1 = LoadTexture("imagenes_danna\\level1-selec.png");
+    Texture2D level2 = LoadTexture("imagenes_danna\\level2-select.png");
     Vector2 postionTexture = {(float)screenWidth / 2 - (float)screenWidth / 2, (float)screenHeight / 2 - (float)screenHeight / 2};
     /******* textura selecciona un nivel*******/
     Texture2D selecNivel = LoadTexture("imagenes_danna\\SELECCIONA_UN_NIVEL.png");
@@ -535,7 +545,7 @@ void MainSelectGame(Music menu)
             UpdateSelectGame();
             DrawTextureEx(texture_selectgame, postionTexture, 0, 1.0f, WHITE); // fondo
             DrawTextureEx(selecNivel, positionZero, 0, 1.0f, WHITE);           // imagen selecciona un nivel
-            DrawSelectGame();
+            DrawSelectGame(level1, level2);
             UpdateMusicStream(menu);
             break;
         case LEVEL1:
@@ -548,32 +558,52 @@ void MainSelectGame(Music menu)
             ClearBackground(WHITE);
             EndDrawing();
             break;
+        case LEAVE:
+            salir = true;
+            break;
         }
-    } while (!WindowShouldClose());
+    } while (!WindowShouldClose() && !salir);
+
+    UnloadTexture(level1);
+    UnloadTexture(level2);
     UnloadTexture(selecNivel);
     UnloadTexture(texture_selectgame);
 }
 
-void DrawSelectGame()
+void DrawSelectGame(Texture2D txt_leve1, Texture2D txt_level2)
 {
-    Rectangle LEVEL1_RECT = {screenWidth / 4, screenHeight / 2, 300, 300};
-    Rectangle LEVEL2_RECT = {screenWidth / 1.79, screenHeight / 2, 300, 300};
     BeginDrawing();
-    DrawRectangleRec(LEVEL1_RECT, WHITE);
-    DrawRectangleRec(LEVEL2_RECT, BLACK);
+    ClearBackground(WHITE);
+
+    Vector2 pos_level1 = {screenWidth / 3.5, screenHeight / 2};
+    Vector2 pos_level2 = {screenWidth / 1.79, screenHeight / 2};
+
+    Rectangle rec = {screenWidth / 4.5, screenHeight / 2.01, screenWidth / 1.79, screenHeight / 3};
+    Color rectangleColor = {0, 0, 0, 128};
+    Color border = {0, 0, 0, 220};
+
+    Color select = {255, 200, 0, 255};
+    float fontSize = 80.0f + 10.0f * sinf(GetTime() * 8.0f);
+
+    if (CheckMouseOnOptionY("Regresar", 75, 0.920))
+    {
+        DrawText("Regresar", screenWidth / 2 - MeasureText("Regresar", fontSize) / 2, screenHeight * 0.860, fontSize, select);
+    }
+    else
+    {
+        DrawText("Regresar", screenWidth / 2 - MeasureText("Regresar", 70) / 2, screenHeight * 0.860, 70, WHITE);
+    }
+
+    DrawRectangleRoundedLines(rec, .30, .20, 13.f, border);
+    DrawRectangleRounded(rec, .30, .50, rectangleColor);
+
+    DrawTextureEx(txt_leve1, pos_level1, 0, 1.0f, WHITE);
+    DrawTextureEx(txt_level2, pos_level2, 0, 1.0f, WHITE);
+
     EndDrawing();
 }
 
 /********************************** FUNCIONES ************************************/
-
-void playsound(Sound sonido, bool flag)
-{
-    if (flag)
-    {
-        PlaySound(sonido);
-    }
-}
-
 bool CheckMouseOnOptionY(const char *optionText, float fontSize, float position)
 {
     Vector2 textSize = MeasureTextEx(GetFontDefault(), optionText, fontSize, 0);
@@ -582,9 +612,17 @@ bool CheckMouseOnOptionY(const char *optionText, float fontSize, float position)
     float centerY = screenHeight * position - textSize.y / 2;
 
     Rectangle optionBounds = {centerX, centerY, textSize.x, textSize.y};
-    // DrawRectangle(centerX, centerY, textSize.x, textSize.y, GREEN);
+    DrawRectangle(centerX, centerY, textSize.x, textSize.y, GREEN);
 
     return CheckCollisionPointRec(mousePosition, optionBounds);
+}
+
+void playsound(Sound sonido, bool flag)
+{
+    if (flag)
+    {
+        PlaySound(sonido);
+    }
 }
 
 bool CheckMouseOnOptionXandY(const char *optionText, float fontSize, float positionX, float positionY)
