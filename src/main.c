@@ -497,8 +497,10 @@ void logoLoading(Texture2D logoTexture, int frameCounter)
 //********************************** SELECCIONAR NIVEL FUNCIONES ****************************************
 void UpdateSelectGame()
 {
+    Vector2 mousePosition = GetMousePosition();
     Rectangle LEVEL1_RECT = {screenWidth / 4, screenHeight / 2, 300, 300};
     Rectangle LEVEL2_RECT = {screenWidth / 1.79, screenHeight / 2, 300, 300};
+    
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
     {
         if (CheckCollisionPointRec(mousePosition, LEVEL1_RECT))
@@ -530,11 +532,11 @@ void MainSelectGame(Music menu)
         switch (currentGameLevel)
         {
         case WAITING:
+            UpdateSelectGame();
             DrawTextureEx(texture_selectgame, postionTexture, 0, 1.0f, WHITE); // fondo
             DrawTextureEx(selecNivel, positionZero, 0, 1.0f, WHITE);           // imagen selecciona un nivel
-            UpdateMusicStream(menu);
-            UpdateSelectGame();
             DrawSelectGame();
+            UpdateMusicStream(menu);
             break;
         case LEVEL1:
             BeginDrawing();
@@ -557,10 +559,8 @@ void DrawSelectGame()
     Rectangle LEVEL1_RECT = {screenWidth / 4, screenHeight / 2, 300, 300};
     Rectangle LEVEL2_RECT = {screenWidth / 1.79, screenHeight / 2, 300, 300};
     BeginDrawing();
-    ClearBackground(PURPLE);
     DrawRectangleRec(LEVEL1_RECT, WHITE);
     DrawRectangleRec(LEVEL2_RECT, BLACK);
-
     EndDrawing();
 }
 
