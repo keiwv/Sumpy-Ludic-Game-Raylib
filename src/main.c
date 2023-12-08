@@ -33,12 +33,18 @@ bool waiting = true;
 int screenWidth = 1920;
 int screenHeight = 1080;
 
+bool pressedButtonNo1Flag = 0;
+bool pressedButtonNo2Flag = 0;
+Vector2 getMouseCollision = {0};
+Vector2 isMousePressedCollision[2] = {0};
+
 //****** PROTOTYPE FUNCTIONS *********************
 void logoLoading(Texture2D logoTexture, int frameCounter);
 
 void UpdateMenu();
 void DrawMenu();
 int getRandomNumber(int ri, int rf);
+double easeInOutCirc(double x);
 
 void UpdateSelectGame();
 void MainSelectGame(int gameMatrix[][MATRIX_WIDTH]);
@@ -48,6 +54,8 @@ void UpdateGameLv1(int gameMatrix[][MATRIX_WIDTH]);
 void DrawGameLv1(int gameMatrix[][MATRIX_WIDTH]);
 
 bool CheckMouseOnOption(const char *optionText, float fontSize, float position);
+void drawMatrixCollision(Rectangle enlargedRect, int gameMatrix[][MATRIX_WIDTH]);
+void drawMatrixSelected(Rectangle number1, int gameMatrix[][MATRIX_WIDTH], int matrixX, int matrixY, int valueX, int valueY);
 
 int main()
 {
@@ -58,6 +66,8 @@ int main()
     Texture2D logoTexture = LoadTexture("resources/logo2.png");
     Image icon = LoadImage("resources/icon.png");
     SetWindowIcon(icon);
+
+    SetTargetFPS(144);
 
     int gameMatrix[MATRIX_HEIGHT][MATRIX_WIDTH];
     for (int i = 0; i < MATRIX_HEIGHT; i++)
@@ -70,7 +80,7 @@ int main()
 
     while (!WindowShouldClose() && !exitProgram)
     {
-        mousePosition = GetMousePosition();
+        // mousePosition = GetMousePosition();
 
         switch (currentScene)
         {
@@ -262,19 +272,22 @@ void DrawGameLv1(int gameMatrix[][MATRIX_WIDTH])
 {
     int matrixX = 400 + (screenWidth - MATRIX_WIDTH * (RECTANGLE_SIZE + 10)) / 2;
     int matrixY = (screenHeight - MATRIX_HEIGHT * (RECTANGLE_SIZE + 10)) / 2;
+    Rectangle number1 = {0};
+    Rectangle number2 = {0};
     BeginDrawing();
     ClearBackground(BLACK);
     char number[4];
 
-    int x = 0;
-    int y = 0;
-
-    float textY;
     float textX;
+    float textY;
+    
 
     Rectangle rectangulo;
     rectangulo.height = RECTANGLE_SIZE;
     rectangulo.width = RECTANGLE_SIZE;
+
+    number1 = rectangulo;
+    number2 = rectangulo;
 
     Rectangle enlargedRect = {0};
 
@@ -285,11 +298,27 @@ void DrawGameLv1(int gameMatrix[][MATRIX_WIDTH])
             rectangulo.x = matrixX + j * (RECTANGLE_SIZE + 10);
             rectangulo.y = matrixY + i * (RECTANGLE_SIZE + 10);
             snprintf(number, sizeof(number), "%d", gameMatrix[i][j]);
+
             if (CheckCollisionPointRec(GetMousePosition(), rectangulo))
             {
                 enlargedRect = rectangulo;
-                x = i;
-                y = j;
+                getMouseCollision.x = i;
+                getMouseCollision.y = j;
+                if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+                {
+                    if (!pressedButtonNo1Flag)
+                    {
+                        isMousePressedCollision[0].x = i;
+                        isMousePressedCollision[0].y = j;
+                        pressedButtonNo1Flag = 1;
+                    }
+                    else
+                    {
+                        isMousePressedCollision[1].x = i;
+                        isMousePressedCollision[1].y = j;
+                        pressedButtonNo2Flag = 1;
+                    }
+                }
             }
             else
             {
@@ -304,22 +333,17 @@ void DrawGameLv1(int gameMatrix[][MATRIX_WIDTH])
 
     if (enlargedRect.width > 0)
     {
-        float getTime = sinf(GetTime() * 8.0f);
-        enlargedRect.x -= 20 + 20 / 2 * getTime;
-        enlargedRect.y -= 20 + 20 / 2 * getTime;
-        enlargedRect.width += 40 + 40 / 2 * getTime;
-        enlargedRect.height += 40 + 40 / 2 * getTime;
+        drawMatrixCollision(enlargedRect, gameMatrix);
+    }
 
+    if (pressedButtonNo1Flag)
+    {
+        drawMatrixSelected(number1, gameMatrix, matrixX, matrixY, (int)isMousePressedCollision[0].x, (int)isMousePressedCollision[0].y);
 
-        DrawRectangleRounded(enlargedRect, 0.4, 0, BLUE);
-        DrawRectangleRoundedLines(enlargedRect, 0.4, 20, 2, WHITE);
-
-        snprintf(number, sizeof(number), "%d", gameMatrix[x][y]);
-
-        textX = enlargedRect.x + (enlargedRect.width - MeasureText(number, (float)(60+ 50*getTime/2))) / 2;
-        textY = enlargedRect.y + (enlargedRect.height - (float)(60+ 50*getTime/2)) / 2;
-
-        DrawText(number, textX, textY, (float)(60+ 50*getTime/2), WHITE);
+        if (pressedButtonNo2Flag)
+        {
+            drawMatrixSelected(number2, gameMatrix, matrixX, matrixY, (int)isMousePressedCollision[1].x, (int)isMousePressedCollision[1].y);
+        }
     }
 
     EndDrawing();
@@ -340,4 +364,60 @@ int getRandomNumber(int ri, int rf)
 {
     int range = (rf - ri + 1);
     return rand() % range + ri;
+}
+
+double easeInOutCirc(double x)
+{
+    if (x < 0)
+    {
+        x = 0;
+    }
+
+    return 0.5 * (1 - cos(x * 3.1416));
+}
+
+void drawMatrixCollision(Rectangle enlargedRect, int gameMatrix[][MATRIX_WIDTH])
+{
+    char number[5];
+    float getTime = 0;
+
+    float textY;
+    float textX;
+
+    getTime = cosf(GetTime() * 5.0f);
+    enlargedRect.x -= 10 + 20 / 2 * getTime;
+    enlargedRect.y -= 10 + 20 / 2 * getTime;
+    enlargedRect.width += 20 + 40 / 2 * getTime;
+    enlargedRect.height += 20 + 40 / 2 * getTime;
+
+    DrawRectangleRounded(enlargedRect, 0.4, 0, BLUE);
+    DrawRectangleRoundedLines(enlargedRect, 0.4, 20, 2, WHITE);
+
+    snprintf(number, sizeof(number), "%d", gameMatrix[(int)getMouseCollision.x][(int)getMouseCollision.y]);
+
+    textX = enlargedRect.x + (enlargedRect.width - MeasureText(number, (float)(80 + 50 * getTime / 2))) / 2;
+    textY = enlargedRect.y + (enlargedRect.height - (float)(80 + 50 * getTime / 2)) / 2;
+
+    DrawText(number, textX, textY, (float)(80 + 50 * getTime / 2), WHITE);
+}
+
+void drawMatrixSelected(Rectangle number1, int gameMatrix[][MATRIX_WIDTH], int matrixX, int matrixY, int valueX, int valueY)
+{
+    char number[5];
+    float getTime;
+    float textY;
+    float textX;
+    number1.x = matrixX + valueY * (RECTANGLE_SIZE + 10);
+    number1.y = matrixY + valueX * (RECTANGLE_SIZE + 10);
+    getTime = easeInOutCirc(sinf(GetTime() * 8.0f));
+    DrawRectangleRounded(number1, 0.4, 0, BLUE);
+    DrawRectangleRoundedLines(number1, 0.4, 20, 2, WHITE);
+
+    
+    snprintf(number, sizeof(number), "%d", gameMatrix[valueX][valueY]);
+
+    textX = number1.x + (number1.width - MeasureText(number, (float)(80 + 50 * getTime / 2))) / 2;
+    textY = number1.y + (number1.height - (float)(80 + 50 * getTime / 2)) / 2;
+
+    DrawText(number, textX, textY+5, (float)(80 + 50 * getTime / 2), WHITE);
 }
