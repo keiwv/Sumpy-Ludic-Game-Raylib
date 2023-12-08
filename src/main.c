@@ -23,6 +23,7 @@ GameScene currentScene = START;
 Vector2 mousePosition = {0};
 /********************  Variables y constantes globales *************************/
 Sound sound1;
+Sound sound2;
 bool waiting = true;
 int selectDino = 0;
 const int screenWidth = 1920;
@@ -32,7 +33,7 @@ static bool soundPaused = true;
 /********************************** PROTOTIPO DE FUNCIONES ************************************/
 void logoLoading(Texture2D logoTexture, int frameCounter);
 void UpdateSelectGame();
-void MainSelectGame();
+void MainSelectGame(Music menu);
 void DrawSelectGame();
 bool CheckMouseOnOptionY(const char *optionText, float fontSize, float position);
 void generate_dinos(int frame, float runningTime, float frameTime, Texture2D dinosaurio, Texture2D sombra, float posX, float posY, int maxFrames, int op);
@@ -245,16 +246,19 @@ void UpdateCustome()
         }
         if (CheckMouseOnOptionXandY("Espy", 70, 0.5, 0.43)) // verifica que dinosaurio escogio
         {
+            playsound(sound2, soundPaused);
             selectDino = 1;
             mostrarMensaje = true;
         }
         if (CheckMouseOnOptionXandY("Nacky", 70, 1, 0.43))
         {
+            playsound(sound2, soundPaused);
             selectDino = 2;
             mostrarMensaje = true;
         }
         if (CheckMouseOnOptionXandY("Juan", 80, 1.4, 0.43))
         {
+            playsound(sound2, soundPaused);
             selectDino = 3;
             mostrarMensaje = true;
         }
@@ -342,8 +346,9 @@ int main()
     PlayMusicStream(level1);
     /*********************************** SONIDOS ***********************************/
     sound1 = LoadSound("audios_danna\\sonido-menu.wav");
+    sound2 = LoadSound("audios_danna\\selectDino.mp3");
     /**************************** Background OPTIONS  ******************************/
-    Image background_options = LoadImage("imagenes_danna\\background_verde.png");
+    Image background_options = LoadImage("imagenes_danna\\background_options.png");
     ImageResize(&background_options, screenWidth, screenHeight);
     Texture2D texture_options = LoadTextureFromImage(background_options);
     UnloadImage(background_options);
@@ -420,8 +425,7 @@ int main()
             DrawCustome(dino1, dino4, dino3, sombra, frame, runningTime, frameTime);
             break;
         case SELECTGAME:
-            UpdateMusicStream(level1);
-            MainSelectGame();
+            MainSelectGame(level1);
             break;
         case EXIT:
             exitProgram = true;
@@ -447,6 +451,7 @@ int main()
 
     return 0;
 }
+/********************************** DESARROLLO DE FUNCIONES ************************************/
 
 //***************************** LOGO LOADING *****************************
 void logoLoading(Texture2D logoTexture, int frameCounter)
@@ -488,8 +493,8 @@ void logoLoading(Texture2D logoTexture, int frameCounter)
 //********************************** SELECCIONAR NIVEL FUNCIONES ****************************************
 void UpdateSelectGame()
 {
-    Rectangle LEVEL1_RECT = {10, 10, 20, 20};
-    Rectangle LEVEL2_RECT = {300, 300, 300, 300};
+    Rectangle LEVEL1_RECT = {screenWidth / 4, screenHeight / 2, 300, 300};
+    Rectangle LEVEL2_RECT = {screenWidth / 1.79, screenHeight / 2, 300, 300};
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
     {
         if (CheckCollisionPointRec(mousePosition, LEVEL1_RECT))
@@ -503,11 +508,12 @@ void UpdateSelectGame()
     }
 }
 
-void MainSelectGame()
+void MainSelectGame(Music menu)
 {
     switch (currentGameLevel)
     {
     case WAITING:
+        UpdateMusicStream(menu);
         UpdateSelectGame();
         DrawSelectGame();
         break;
@@ -528,16 +534,31 @@ void DrawSelectGame()
 {
     // AQUI PUEDES MODIFICAR TODO LO RELACIONADO CON EL SELECCIONAR NIVEL (DECORARLO). LOS RENCTÁNGULOS SON GUÍAS. PARA MOPDIFICAR LA POSICIÓN, DEBEN COINCIDIR LOS VALORES
     // DEL RECTANGULO DE ESTA FUNCIÓN LAS DE RECTANGULO EN LA FUNCION "UpdateSelectGame()". RECUERDA VER QUE DATOS TIENE LA ESTRUCTURA RECTANGLE.
-    Rectangle LEVEL1_RECT = {10, 10, 20, 20};
-    Rectangle LEVEL2_RECT = {300, 300, 300, 300};
+    Rectangle LEVEL1_RECT = {screenWidth / 4, screenHeight / 2, 300, 300};
+    Rectangle LEVEL2_RECT = {screenWidth / 1.79, screenHeight / 2, 300, 300};
+    /************************ Background SELECTGAME ******************************/
+    Image background_selectgame = LoadImage("imagenes_danna\\background_selectgame.png");
+    ImageResize(&background_selectgame, screenWidth, screenHeight);
+    Texture2D texture_selectgame = LoadTextureFromImage(background_selectgame);
+    UnloadImage(background_selectgame);
+    Vector2 postionTexture = {(float)screenWidth / 2 - (float)screenWidth / 2, (float)screenHeight / 2 - (float)screenHeight / 2};
+    /******* textura selecciona un nivel*******/
+    Texture2D selecNivel = LoadTexture("imagenes_danna\\SELECCIONA_UN_NIVEL.png");
+    Vector2 positionZero = {screenWidth / 2 - selecNivel.width / 2, screenHeight / 2 - selecNivel.height * 1.8};
+    DrawTextureEx(texture_selectgame, postionTexture, 0, 1.0f, WHITE); // fondo
+    DrawTextureEx(selecNivel, positionZero, 0, 1.0f, WHITE);           // imagen selecciona un nivel
+
     BeginDrawing();
     ClearBackground(PURPLE);
     DrawRectangleRec(LEVEL1_RECT, WHITE);
     DrawRectangleRec(LEVEL2_RECT, BLACK);
+
     EndDrawing();
+    UnloadTexture(selecNivel);
+    UnloadTexture(texture_selectgame);
 }
 
-/********************************** DESARROLLO DE FUNCIONES ************************************/
+/********************************** FUNCIONES ************************************/
 
 void playsound(Sound sonido, bool flag)
 {
