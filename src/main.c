@@ -1,5 +1,6 @@
 #include "raylib.h"
 #include <math.h>
+#include <stdio.h>
 
 typedef enum
 {
@@ -30,6 +31,8 @@ const int screenWidth = 1920;
 const int screenHeight = 1080;
 static bool musicPaused = false;
 static bool soundPaused = true;
+
+bool flagLoadTextures = false;
 /********************************** PROTOTIPO DE FUNCIONES ************************************/
 void logoLoading(Texture2D logoTexture, int frameCounter);
 void UpdateSelectGame();
@@ -511,32 +514,8 @@ void UpdateSelectGame()
 
 void MainSelectGame(Music menu)
 {
-    switch (currentGameLevel)
-    {
-    case WAITING:
-        UpdateMusicStream(menu);
-        UpdateSelectGame();
-        DrawSelectGame();
-        break;
-    case LEVEL1:
-        BeginDrawing();
-        ClearBackground(BLACK);
-        EndDrawing();
-        break;
-    case LEVEL2:
-        BeginDrawing();
-        ClearBackground(WHITE);
-        EndDrawing();
-        break;
-    }
-}
-
-void DrawSelectGame()
-{
     // AQUI PUEDES MODIFICAR TODO LO RELACIONADO CON EL SELECCIONAR NIVEL (DECORARLO). LOS RENCTÁNGULOS SON GUÍAS. PARA MOPDIFICAR LA POSICIÓN, DEBEN COINCIDIR LOS VALORES
     // DEL RECTANGULO DE ESTA FUNCIÓN LAS DE RECTANGULO EN LA FUNCION "UpdateSelectGame()". RECUERDA VER QUE DATOS TIENE LA ESTRUCTURA RECTANGLE.
-    Rectangle LEVEL1_RECT = {screenWidth / 4, screenHeight / 2, 300, 300};
-    Rectangle LEVEL2_RECT = {screenWidth / 1.79, screenHeight / 2, 300, 300};
     /************************ Background SELECTGAME ******************************/
     Image background_selectgame = LoadImage("imagenes_danna\\background_selectgame.png");
     ImageResize(&background_selectgame, screenWidth, screenHeight);
@@ -546,17 +525,43 @@ void DrawSelectGame()
     /******* textura selecciona un nivel*******/
     Texture2D selecNivel = LoadTexture("imagenes_danna\\SELECCIONA_UN_NIVEL.png");
     Vector2 positionZero = {screenWidth / 2 - selecNivel.width / 2, screenHeight / 2 - selecNivel.height * 1.8};
-    DrawTextureEx(texture_selectgame, postionTexture, 0, 1.0f, WHITE); // fondo
-    DrawTextureEx(selecNivel, positionZero, 0, 1.0f, WHITE);           // imagen selecciona un nivel
+    do
+    {
+        switch (currentGameLevel)
+        {
+        case WAITING:
+            DrawTextureEx(texture_selectgame, postionTexture, 0, 1.0f, WHITE); // fondo
+            DrawTextureEx(selecNivel, positionZero, 0, 1.0f, WHITE);           // imagen selecciona un nivel
+            UpdateMusicStream(menu);
+            UpdateSelectGame();
+            DrawSelectGame();
+            break;
+        case LEVEL1:
+            BeginDrawing();
+            ClearBackground(BLACK);
+            EndDrawing();
+            break;
+        case LEVEL2:
+            BeginDrawing();
+            ClearBackground(WHITE);
+            EndDrawing();
+            break;
+        }
+    } while (!WindowShouldClose());
+    UnloadTexture(selecNivel);
+    UnloadTexture(texture_selectgame);
+}
 
+void DrawSelectGame()
+{
+    Rectangle LEVEL1_RECT = {screenWidth / 4, screenHeight / 2, 300, 300};
+    Rectangle LEVEL2_RECT = {screenWidth / 1.79, screenHeight / 2, 300, 300};
     BeginDrawing();
     ClearBackground(PURPLE);
     DrawRectangleRec(LEVEL1_RECT, WHITE);
     DrawRectangleRec(LEVEL2_RECT, BLACK);
 
     EndDrawing();
-    UnloadTexture(selecNivel);
-    UnloadTexture(texture_selectgame);
 }
 
 /********************************** FUNCIONES ************************************/
