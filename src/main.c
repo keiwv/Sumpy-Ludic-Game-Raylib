@@ -429,8 +429,11 @@ int main()
             DrawCustome(dino1, dino4, dino3, sombra, frame, runningTime, frameTime);
             break;
         case SELECTGAME:
+            currentGameLevel = WAITING;
             PauseMusicStream(music);
             MainSelectGame(level1);
+            PlayMusicStream(music);
+            currentScene = START;
             break;
         case EXIT:
             exitProgram = true;
@@ -501,7 +504,6 @@ void UpdateSelectGame()
     Vector2 mousePosition = GetMousePosition();
     Rectangle LEVEL1_RECT = {screenWidth / 3.5, screenHeight / 2, 235, 250};
     Rectangle LEVEL2_RECT = {screenWidth / 1.79, screenHeight / 2, 235, 250};
- 
 
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
     {
@@ -513,7 +515,7 @@ void UpdateSelectGame()
         {
             currentGameLevel = LEVEL2;
         }
-        if (CheckMouseOnOptionXandY("Regresar", 70, screenWidth / 2 - MeasureText("Regresar", 70) / 2, screenHeight * 0.860))
+        if (CheckMouseOnOptionY("Regresar", 75, 0.920))
         {
             currentGameLevel = LEAVE;
         }
@@ -606,6 +608,7 @@ void DrawSelectGame(Texture2D txt_leve1, Texture2D txt_level2)
 /********************************** FUNCIONES ************************************/
 bool CheckMouseOnOptionY(const char *optionText, float fontSize, float position)
 {
+    Vector2 mousePosition = GetMousePosition();
     Vector2 textSize = MeasureTextEx(GetFontDefault(), optionText, fontSize, 0);
 
     float centerX = screenWidth / 2 - textSize.x / 2;
@@ -627,14 +630,14 @@ void playsound(Sound sonido, bool flag)
 
 bool CheckMouseOnOptionXandY(const char *optionText, float fontSize, float positionX, float positionY)
 {
+    Vector2 mousePosition = GetMousePosition();
     Vector2 textSize = MeasureTextEx(GetFontDefault(), optionText, fontSize, 0);
 
     float centerX = screenWidth * positionX / 2 - textSize.x / 2;
     float centerY = screenHeight * positionY - textSize.y / 2;
 
     Rectangle optionBounds = {centerX, centerY, textSize.x, textSize.y};
-    // DrawRectangle(centerX, centerY, textSize.x, textSize.y, GREEN);
-
+    DrawRectangle(centerX, centerY, textSize.x, textSize.y, VIOLET);
     return CheckCollisionPointRec(mousePosition, optionBounds);
 }
 
