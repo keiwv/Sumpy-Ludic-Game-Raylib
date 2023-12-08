@@ -46,7 +46,7 @@ void UpdateMenu()
 {
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
     {
-        if (CheckMouseOnOptionY("Seleccionar nivel", 70, 0.532))
+        if (CheckMouseOnOptionY("Jugar", 70, 0.532))
         {
             playsound(sound1, soundPaused);
             currentScene = SELECTGAME;
@@ -82,13 +82,13 @@ void DrawMenu(Texture2D dinosaurio, int frame, float runningTime, float frameTim
     int maxFrames = 24;
     generate_dinos(frame, runningTime, frameTime, dinosaurio, sombra, (float)screenWidth / 12, (float)screenHeight / 1.9, maxFrames, 1);
     /*****************************************************************************************************/
-    if (CheckMouseOnOptionY("Selecciona un nivel", 70, 0.532))
+    if (CheckMouseOnOptionY("Jugar", 70, 0.532))
     {
-        DrawText("Selecciona un nivel", screenWidth / 2 - MeasureText("Selecciona un nivel", fontSize) / 2, screenHeight / 2, fontSize, select);
+        DrawText("Jugar", screenWidth / 2 - MeasureText("Jugar", fontSize) / 2, screenHeight / 2, fontSize, select);
     }
     else
     {
-        DrawText("Selecciona un nivel", screenWidth / 2 - MeasureText("Selecciona un nivel", 70) / 2, screenHeight / 2, 70, WHITE);
+        DrawText("Jugar", screenWidth / 2 - MeasureText("Jugar", 70) / 2, screenHeight / 2, 70, WHITE);
     }
 
     if (CheckMouseOnOptionY("Personajes", 70, 0.615))
@@ -425,6 +425,7 @@ int main()
             DrawCustome(dino1, dino4, dino3, sombra, frame, runningTime, frameTime);
             break;
         case SELECTGAME:
+            PauseMusicStream(music);
             MainSelectGame(level1);
             break;
         case EXIT:
