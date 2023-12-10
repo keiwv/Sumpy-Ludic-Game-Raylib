@@ -19,6 +19,7 @@ typedef enum
     WAITING,
     LEVEL1,
     LEVEL2,
+    OPTIONS2,
     LEAVE
 } GameLevel;
 
@@ -81,7 +82,11 @@ void DrawSelectGame(Texture2D txt_leve1, Texture2D txt_level2, Texture2D estrell
 
 /*        ************************ NIVELES **************************************         */
 void DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_WIDTH], Color preColors[], Texture2D fondo, Texture2D icono, Vector2 posicion, int frame, float runningTime, float frameTime, Texture2D bordes);
-bool UpdateGameLv1(int gameMatrix[][MATRIX_WIDTH], Vector2 position[], int userInput);
+void UpdateGameLv1();
+void DrawOptionsLevel(int frame, float runningTime, float frameTime);
+void UpdateOptionLevel1();
+
+bool verificar_suma(int gameMatrix[][MATRIX_WIDTH], Vector2 position[], int userInput);
 //******************************   DINOSAURIOS   *************************************
 void DrawCustome(int frame, float runningTime, float frameTime);
 void UpdateCustome();
@@ -461,16 +466,21 @@ void MainSelectGame()
         case WAITING:
             UpdateSelectGame();
             DrawTextureEx(selectgame_txt, postionTexture, 0, 1.0f, WHITE); // fondo
-            DrawTexture(selecNivel, 250, 150, WHITE); // imagen selecciona un nivel
+            DrawTexture(selecNivel, 250, 150, WHITE);                      // imagen selecciona un nivel
             DrawSelectGame(level1_txt, level2_txt, estrellas_vacias, estrellas, frame, runningTime, frameTime);
             break;
         case LEVEL1:
             DrawGameLv1(gameMatrix, squareMatrixColor, preColors, bg_level1_txt, icono, postionTexture, frame, runningTime, frameTime, bordes);
+            UpdateGameLv1();
             break;
         case LEVEL2:
             BeginDrawing();
             ClearBackground(WHITE);
             EndDrawing();
+            break;
+        case OPTIONS2:
+            DrawOptionsLevel(frame, runningTime, frameTime);
+            UpdateOptionLevel1();
             break;
         case LEAVE:
             salir = true;
@@ -571,7 +581,7 @@ void DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_
 
     BeginDrawing();
     ClearBackground(BLACK);
-
+    /**** dibujar cosas necesarias para nivel  ***/
     Rectangle rec = {63, 215, 762, 305};
     Rectangle rec2 = {150, 552, 600, 150};
     Rectangle rec3 = {860, 200, 1000, 780};
@@ -583,8 +593,11 @@ void DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_
     DrawRectangleRounded(rec3, .10, .50, rectangleColor);
     DrawRectangle(0, screenHeight * 0.0001, 1920, 140, BLACK);
     DrawTexture(bordes, 50, 200, WHITE);
-    DrawTexture(icono, screenHeight * 0.0001, screenHeight / 2, WHITE);
+    // DrawTexture(icono, screenHeight * 0.0001, screenHeight / 2, WHITE); // modificar eso
     DrawTextEx(fonT, "+", pos, 220, 0, WHITE);
+    Vector2 pos_nivel = {40, 20};
+    DrawTextEx(fonT, "Level 1", pos_nivel, 100, 0, WHITE);
+    DrawCircle(1850, 80, 50, WHITE); // ciruclo de ajustes
 
     if (selectDino == 1)
     {
@@ -760,7 +773,7 @@ void DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_
                     bool resultFlag;
                     int userInput = atoi(inputNumbers);
 
-                    resultFlag = UpdateGameLv1(gameMatrix, isMousePressedCollision, userInput);
+                    resultFlag = verificar_suma(gameMatrix, isMousePressedCollision, userInput);
 
                     if (resultFlag)
                     {
@@ -798,7 +811,7 @@ void DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_
 
     EndDrawing();
 }
-bool UpdateGameLv1(int gameMatrix[][MATRIX_WIDTH], Vector2 position[], int userInput)
+bool verificar_suma(int gameMatrix[][MATRIX_WIDTH], Vector2 position[], int userInput)
 {
     int gameNumberSum;
     gameNumberSum = gameMatrix[(int)position[0].x][(int)position[0].y] + gameMatrix[(int)position[1].x][(int)position[1].y];
@@ -808,6 +821,110 @@ bool UpdateGameLv1(int gameMatrix[][MATRIX_WIDTH], Vector2 position[], int userI
         return true;
     }
     return false;
+}
+
+void UpdateGameLv1()
+{
+    Vector2 mousePosition = GetMousePosition();
+    Rectangle ajustes = {1820, 40, 300, 80};
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+    {
+        if (CheckCollisionPointRec(mousePosition, ajustes))
+        {
+            playsound(sound1, soundPaused);
+            currentGameLevel = OPTIONS2;
+        }
+    }
+}
+
+void DrawOptionsLevel(int frame, float runningTime, float frameTime)
+{
+    Vector2 postionTexture = {(float)screenWidth / 2 - (float)screenWidth / 2, (float)screenHeight / 2 - (float)screenHeight / 2};
+    DrawTextureEx(texture_options, postionTexture, 0, 1.0f, WHITE);
+
+    Color colo1 = {207, 207, 207, 255};
+
+    BeginDrawing();
+    ClearBackground(WHITE);
+    if (!musicPaused)
+    {
+        UpdateMusicStream(music);
+    }
+    Color select = {255, 200, 0, 255};
+    /******************************* GENERAR RECTANGULO ******************************/
+    generte_rec();
+    /**************************** GENERAR DINOSAURIO  *******************************/
+    generate_dinos(frame, runningTime, frameTime, dino2, screenWidth / 1.35, screenHeight / 2, 24, 1);
+    /********************************************************************************/
+    texto_sencillo("Efectos", 0.532, 70, 2.1, 2, false);
+    if (soundPaused)
+    {
+        DrawText("ON", screenWidth / 1.559 - MeasureText("Efectos", 70) / 2, screenHeight / 1.96, 60, colo1);
+    }
+    else
+    {
+        DrawText("OFF", screenWidth / 1.559 - MeasureText("Efectos", 70) / 2, screenHeight / 1.96, 60, select);
+    }
+    texto_sencillo("Musica", 0.620, 70, 2.1, 0.580, true);
+    if (musicPaused)
+    {
+        DrawText("OFF", screenWidth / 1.6 - MeasureText("Musica", 70) / 2, screenHeight * 0.595, 60, select);
+    }
+    else
+    {
+        DrawText("ON", screenWidth / 1.6 - MeasureText("Musica", 70) / 2, screenHeight * 0.595, 60, colo1);
+    }
+    texto_sencillo("Regresar", 0.70, 70, 2, 0.660, true);
+    texto_sencillo("Salir del juego", 0.78, 70, 2, 0.755, true);
+    // texto_sencillo("Salir", 0.78, 70, 2, 0.800, true);
+
+    EndDrawing();
+}
+void UpdateOptionLevel1()
+{
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+    {
+        if (CheckMouseOnOptionY("Salir del juego", 70, 0.78))
+        {
+            playsound(sound1, soundPaused);
+            currentGameLevel = WAITING;
+        }
+        if (CheckMouseOnOptionY("Regresar", 70, 0.70))
+        {
+            playsound(sound1, soundPaused);
+            currentGameLevel = LEVEL1;
+        }
+        if (CheckMouseOnOptionY("Musica", 70, 0.620))
+        {
+            playsound(sound1, soundPaused);
+            if (musicPaused)
+            {
+                ResumeMusicStream(level1);
+                ResumeMusicStream(music);
+                musicPaused = false;
+            }
+            else
+            {
+                PauseMusicStream(level1);
+                PauseMusicStream(music);
+                musicPaused = true;
+            }
+        }
+        if (CheckMouseOnOptionY("Efectos", 70, 0.532))
+        {
+            if (soundPaused)
+            {
+                ResumeSound(sound1);
+                soundPaused = false;
+            }
+            else
+            {
+                PauseSound(sound1);
+                soundPaused = true;
+                playsound(sound1, soundPaused);
+            }
+        }
+    }
 }
 
 //******************************   DINOSAURIOS   *************************************
