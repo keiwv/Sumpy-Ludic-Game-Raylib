@@ -49,6 +49,8 @@ Texture2D dino1;
 Texture2D dino2;
 Texture2D dino3;
 Texture2D dino4;
+Texture2D mnsj_correcto;
+Texture2D mnsj_incorrecto;
 bool waiting = true;
 int selectDino = 0;
 const int screenWidth = 1920;
@@ -409,6 +411,8 @@ void MainSelectGame()
     /*********************************** Texturas niveles **************************************/
     Texture2D bordes = LoadTexture("imagenes_danna\\diseno_numeros.png");
     Texture2D icono = LoadTextureFromImage(icon);
+    mnsj_correcto = LoadTexture("imagenes_danna\\mnsj_correcto_dino.png");
+    mnsj_incorrecto = LoadTexture("imagenes_danna\\mnsj_incorrecto.png");
     /***************************  Imagenes de niveles *******************************/
     Texture2D level1_txt = LoadTexture("imagenes_danna\\selectLevel1-removebg-preview.png");
     Texture2D level2_txt = LoadTexture("imagenes_danna\\selectLevel2-removebg-preview.png");
@@ -417,7 +421,6 @@ void MainSelectGame()
     Vector2 postionTexture = {(float)screenWidth / 2 - (float)screenWidth / 2, (float)screenHeight / 2 - (float)screenHeight / 2};
     /******* textura selecciona un nivel*******/
     Texture2D selecNivel = LoadTexture("imagenes_danna\\SELECCIONA_UN_NIVEL.png");
-    Vector2 positionZero = {screenWidth / 2 - selecNivel.width / 2, screenHeight / 2 - selecNivel.height * 1.8};
     /****************************  Movimiento dinosaurio ****************************/
     int frame = 0;
     float runningTime = 0;
@@ -487,6 +490,7 @@ void MainSelectGame()
             break;
         }
     } while (!WindowShouldClose() && !salir);
+    UnloadTexture(mnsj_correcto);
     UnloadTexture(icono);
     UnloadTexture(bordes);
     UnloadTexture(bg_level1_txt);
@@ -777,6 +781,7 @@ void DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_
 
                     if (resultFlag)
                     {
+
                         pressedButtonNo1Flag = 0;
                         pressedButtonNo2Flag = 0;
 
@@ -808,7 +813,14 @@ void DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_
             }
         }
     }
-
+    if (guessedRight)
+    {
+        DrawTexture(mnsj_correcto, 250, 600, WHITE);
+    }
+    else
+    {
+        DrawTexture(mnsj_incorrecto, 250, 600, WHITE);
+    }
     EndDrawing();
 }
 bool verificar_suma(int gameMatrix[][MATRIX_WIDTH], Vector2 position[], int userInput)
