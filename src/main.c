@@ -569,7 +569,6 @@ void DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_
     static int inputLengthNumbers = 0;
 
     char number[4];
-
     Rectangle displayNumber = {0};
     int tempCorrectedGuess[2][2];
 
@@ -584,7 +583,9 @@ void DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_
 
     BeginDrawing();
     ClearBackground(BLACK);
-    // DrawRectangle(0, 0, 1920, 114, RED);
+    DrawRectangle(0, 0, 1920, 114, RED);
+    DrawRectangle(63, 215, 745, 328, BLUE);
+    DrawRectangle(150, 575, 550, 137, WHITE);
 
     for (int i = 0; i < MATRIX_HEIGHT; i++)
     {
@@ -707,7 +708,7 @@ void DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_
             int key = GetKeyPressed();
             if (key >= 48 && key <= 57)
             {
-                if (inputLengthNumbers < 4)
+                if (inputLengthNumbers < 2)
                 {
                     inputNumbers[inputLengthNumbers] = (char)key;
                     inputLengthNumbers++;
@@ -722,6 +723,11 @@ void DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_
                     inputLengthNumbers--;
                     inputNumbers[inputLengthNumbers] = '\0';
                 }
+            }
+            if (inputLengthNumbers == 0)
+            {
+                // Draw text "Ingresa la respuesta"
+                DrawText("Ingresa la respuesta", 200, 630, 40, GRAY);
             }
 
             if (IsKeyPressed(KEY_ENTER))
@@ -760,7 +766,8 @@ void DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_
             }
             else
             {
-                DrawText(inputNumbers, 100, 200, 200, BLUE); // Display numbers on screen. You can modify this for a different font.
+
+                DrawText(inputNumbers, 520, 580, 150, BLACK); // Display numbers on screen. You can modify this for a different font.
             }
         }
     }
