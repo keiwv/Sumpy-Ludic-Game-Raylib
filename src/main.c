@@ -385,7 +385,7 @@ void UpdateSelectGame(Sound sonido, Sound sonido2)
 {
     Vector2 mousePosition = GetMousePosition();
     Rectangle LEVEL1_RECT = {screenWidth / 3.5, screenHeight / 2, 235, 250};
-    Rectangle LEVEL2_RECT = {screenWidth / 1.79, screenHeight / 2, 235, 250};
+    Rectangle LEVEL2_RECT = {screenWidth / 1.75, screenHeight / 2, 225, 250};
 
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
     {
@@ -415,8 +415,8 @@ void MainSelectGame(Music menu, Sound sonido, Sound sonido2, Texture2D espy, Tex
     Texture2D texture_selectgame = LoadTextureFromImage(background_selectgame);
     UnloadImage(background_selectgame);
     /***************************  Imagenes de niveles *******************************/
-    Texture2D level1 = LoadTexture("imagenes_danna\\level1-selec.png");
-    Texture2D level2 = LoadTexture("imagenes_danna\\level2-select.png");
+    Texture2D level1 = LoadTexture("imagenes_danna\\selectLevel1-removebg-preview.png");
+    Texture2D level2 = LoadTexture("imagenes_danna\\selectLevel2-removebg-preview.png");
     Vector2 postionTexture = {(float)screenWidth / 2 - (float)screenWidth / 2, (float)screenHeight / 2 - (float)screenHeight / 2};
     /******* textura selecciona un nivel*******/
     Texture2D selecNivel = LoadTexture("imagenes_danna\\SELECCIONA_UN_NIVEL.png");
@@ -778,7 +778,6 @@ bool UpdateGameLv1(int gameMatrix[][MATRIX_WIDTH], Vector2 position[], int userI
     }
     return false;
 }
-
 
 //******************************   DINOSAURIOS   *************************************
 void DrawCustome(Texture2D dino, Texture2D dino2, Texture2D dino3, Texture2D sombra, int frame, float runningTime, float frameTime, Music music, Font fuente)
