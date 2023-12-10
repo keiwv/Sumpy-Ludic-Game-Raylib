@@ -26,9 +26,27 @@ GameLevel currentGameLevel = WAITING;
 GameScene currentScene = START;
 Vector2 mousePosition = {0};
 /********************  VARIABLES Y CONSTANTES GLOBALES *************************/
+Font fonT;
 Sound sound1;
 Sound sound2;
 Sound sound3;
+Image icon;
+Music music;
+Music level1;
+Image background_options;
+Texture2D texture_options;
+Image som;
+Texture2D sombra;
+Texture2D texture_logo;
+Image background_start;
+Texture2D texture_start;
+Image background_custome;
+Texture2D texture_custome;
+Texture2D selectPers;
+Texture2D dino1;
+Texture2D dino2;
+Texture2D dino3;
+Texture2D dino4;
 bool waiting = true;
 int selectDino = 0;
 const int screenWidth = 1920;
@@ -36,6 +54,7 @@ const int screenHeight = 1080;
 static bool musicPaused = false;
 static bool soundPaused = true;
 bool flagLoadTextures = false;
+
 /*************** JUEGO GLOBALES IMPORTANTES**************************/
 #define MATRIX_WIDTH 9
 #define MATRIX_HEIGHT 7
@@ -47,28 +66,28 @@ Vector2 isMousePressedCollision[2] = {0};
 bool guessedRight = false;
 /********************************** PROTOTIPO DE FUNCIONES ************************************/
 /*      ************************ MANEJO DE ESCENARIOS Y JUEGO ***********************/
-void logoLoading(Texture2D logoTexture, int frameCounter);
+void logoLoading(int frameCounter);
 
 void UpdateMenu();
-void DrawMenu(Texture2D dinosaurio, int frame, float runningTime, float frameTime, Texture2D sombra, Music music, Font fuente);
+void DrawMenu(int frame, float runningTime, float frameTime);
 
-void UpdateOptions(Music music, Music level1);
-void DrawOptions(Texture2D dinosaurio, int frame, float runningTime, float frameTime, Texture2D sombra, Music music, Font fuente);
+void UpdateOptions();
+void DrawOptions(int frame, float runningTime, float frameTime);
 
-void UpdateSelectGame(Sound sonido, Sound sonido2);
-void MainSelectGame(Music menu, Sound sonido, Sound sonido2, Texture2D espy, Texture2D nacky, Texture2D juan, Texture2D sombra);
+void UpdateSelectGame();
+void MainSelectGame();
 
-void DrawSelectGame(Texture2D txt_leve1, Texture2D txt_level2, Music musica, Texture2D espy, Texture2D nacky, Texture2D juan, Texture2D sombra, int frame, float runningTime, float frameTime);
+void DrawSelectGame(Texture2D txt_leve1, Texture2D txt_level2, Texture2D estrellas_vacias, Texture2D estrellas, int frame, float runningTime, float frameTime);
 
 /*        ************************ NIVELES **************************************         */
 void DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_WIDTH], Color preColors[]);
 bool UpdateGameLv1(int gameMatrix[][MATRIX_WIDTH], Vector2 position[], int userInput);
 //******************************   DINOSAURIOS   *************************************
-void DrawCustome(Texture2D dino, Texture2D dino2, Texture2D dino3, Texture2D sombra, int frame, float runningTime, float frameTime, Music music, Font fuente);
-void UpdateCustome(Texture2D selectPers);
+void DrawCustome(int frame, float runningTime, float frameTime);
+void UpdateCustome();
 
-void generate_dinos(int frame, float runningTime, float frameTime, Texture2D dinosaurio, Texture2D sombra, float posX, float posY, int maxFrames, int op);
-void generate_dino_noAnimated(Texture2D dinosaurio, int maxFrames, Texture2D sombra, float posX, float posY);
+void generate_dinos(int frame, float runningTime, float frameTime, Texture2D dinosaurio, float posX, float posY, int maxFrames, int op);
+void generate_dino_noAnimated(Texture2D dinosaurio, int maxFrames, float posX, float posY);
 
 //*************** FUNCIONES DE ANIMACION PARA EL JUEGO ******************************
 void drawMatrixCollision(Rectangle enlargedRect, int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_WIDTH], Color preColors[]);
@@ -76,9 +95,10 @@ void drawMatrixSelected(Rectangle number1, int gameMatrix[][MATRIX_WIDTH], int m
 bool modifyMatrix(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_WIDTH], Color preColors[3]);
 double easeInOutCirc(double x);
 
-//**************************** FUNCIONES EXTRAS *************************
+//**************************** FUNCIONES EXTRAS ************************
+void cargar_texturas(void);
 int getRandomNumber(int ri, int rf);
-void texto_sencillo(char texto[], float posicion, float font, float x, float y, bool mult, Font fonT);
+void texto_sencillo(char texto[], float posicion, float font, float x, float y, bool mult);
 void playsound(Sound sonido, bool flag);
 bool CheckMouseOnOptionXandY(const char *optionText, float fontSize, float positionX, float positionY);
 bool CheckMouseOnOptionY(char optionText[], float fontSize, float position);
@@ -88,53 +108,17 @@ void generte_rec(void);
 int main()
 {
     InitWindow(screenWidth, screenHeight, "Sumpy");
-    Image icon = LoadImage("imagenes_danna\\icon.png");
-    SetWindowIcon(icon);
-    /*******************************    MUSICA    **********************************/
     InitAudioDevice();
-    Music music = LoadMusicStream("audios_danna\\menu_musica.mp3");
-    Music level1 = LoadMusicStream("audios_danna\\LEVEL_.mp3");
+    cargar_texturas();
+    SetWindowIcon(icon);
     PlayMusicStream(music);
     PlayMusicStream(level1);
-    /*********************************** SONIDOS ***********************************/
-    sound1 = LoadSound("audios_danna\\sonido-menu.wav");
-    sound2 = LoadSound("audios_danna\\selectDino.mp3");
-    sound3 = LoadSound("audios_danna\\selectLevel.mp3");
-    /************************ FUENTES ****************************/
-    Font fonT = LoadFont("fuentes_danna\\Pixellari.ttf");
-    /**************************** Background OPTIONS  ******************************/
-    Image background_options = LoadImage("imagenes_danna\\background_options.png");
-    ImageResize(&background_options, screenWidth, screenHeight);
-    Texture2D texture_options = LoadTextureFromImage(background_options);
-    UnloadImage(background_options);
-    /**************************** Background START  ********************************/
-    Image som = LoadImage("imagenes_danna\\sheets\\shadow_2.png");
-    ImageResize(&som, 200, 200);
-    Texture2D sombra = LoadTextureFromImage(som);
-    Texture2D texture_logo = LoadTexture("imagenes_danna\\logo.png");
-    Image background_start = LoadImage("imagenes_danna\\background_menu.png");
-    ImageResize(&background_start, screenWidth, screenHeight);
-    Texture2D texture_start = LoadTextureFromImage(background_start);
-    UnloadImage(som);
-    UnloadImage(background_start);
-    /***************************** Background CUSTOME **********************************/
-    Image background_custome = LoadImage("imagenes_danna\\background_level2.png");
-    ImageResize(&background_custome, screenWidth, screenHeight);
-    Texture2D texture_custome = LoadTextureFromImage(background_custome);
-    UnloadImage(background_custome);
-    Texture2D selectPers = LoadTexture("imagenes_danna\\SELECCIONA UN PERSONAJE (1).png");
-    /********************************** Dinosaurios ***********************************/
-    Texture2D dino1 = LoadTexture("imagenes_danna\\sheets\\DinoSprites - doux.png");
-    Texture2D dino2 = LoadTexture("imagenes_danna\\sheets\\DinoSprites - vita.png");
-    Texture2D dino3 = LoadTexture("imagenes_danna\\sheets\\DinoSprites - mort.png");
-    Texture2D dino4 = LoadTexture("imagenes_danna\\sheets\\DinoSprites - tard.png");
     /****************************  Movimiento dinosaurio ****************************/
     int frame = 0;
     float runningTime = 0;
     const float frameTime = 1.0f / 10.0f;
     /*********************************************************************************/
     bool exitProgram = false;
-
     Vector2 postionTexture = {(float)screenWidth / 2 - (float)screenWidth / 2, (float)screenHeight / 2 - (float)screenHeight / 2};
     Vector2 positionZero = {screenWidth / 2 - texture_logo.width / 2, screenHeight / 2 - texture_logo.height * 1.4};
     float dT;
@@ -161,27 +145,27 @@ int main()
         {
         case LOGO:
             frameCounter++;
-            logoLoading(texture_logo, frameCounter); // NO MODIFICAR ESTA FUNCIÓN, SOLUCIONARÉ ALGUNOS PROBLEMAS.
+            logoLoading(frameCounter); // NO MODIFICAR ESTA FUNCIÓN, SOLUCIONARÉ ALGUNOS PROBLEMAS.
             break;
         case START:
             DrawTextureEx(texture_start, postionTexture, 0, 1.0f, WHITE);
             DrawTextureEx(texture_logo, positionZero, 0, 1.0f, WHITE);
             UpdateMenu();
-            DrawMenu(dino1, frame, runningTime, frameTime, sombra, music, fonT);
+            DrawMenu(frame, runningTime, frameTime);
             break;
         case OPTIONS:
             DrawTextureEx(texture_options, postionTexture, 0, 1.0f, WHITE);
             UpdateOptions(music, level1);
-            DrawOptions(dino2, frame, runningTime, frameTime, sombra, music, fonT);
+            DrawOptions(frame, runningTime, frameTime);
             break;
         case CUSTOME:
             DrawTextureEx(texture_custome, postionTexture, 0, 1.0f, WHITE);
-            UpdateCustome(selectPers);
-            DrawCustome(dino1, dino4, dino3, sombra, frame, runningTime, frameTime, music, fonT);
+            UpdateCustome();
+            DrawCustome(frame, runningTime, frameTime);
             break;
         case SELECTGAME:
             currentGameLevel = WAITING;
-            MainSelectGame(level1, sound1, sound3, dino1, dino4, dino3, sombra);
+            MainSelectGame();
             PlayMusicStream(music);
             currentScene = START;
             break;
@@ -214,7 +198,7 @@ int main()
 /********************************** DESARROLLO DE FUNCIONES ************************************/
 
 /*      ************************ MANEJO DE ESCENARIOS ***********************/
-void logoLoading(Texture2D logoTexture, int frameCounter)
+void logoLoading(int frameCounter)
 {
     float logoOpacity = 0.0f;
 
@@ -243,14 +227,14 @@ void logoLoading(Texture2D logoTexture, int frameCounter)
 
     BeginDrawing();
     ClearBackground(GREEN);
-    DrawTexturePro(logoTexture, (Rectangle){0, 0, logoTexture.width, logoTexture.height},
-                   (Rectangle){screenWidth / 2 - logoTexture.width / 2, screenHeight / 2 - logoTexture.height / 2,
-                               logoTexture.width, logoTexture.height},
+    DrawTexturePro(texture_logo, (Rectangle){0, 0, texture_logo.width, texture_logo.height},
+                   (Rectangle){screenWidth / 2 - texture_logo.width / 2, screenHeight / 2 - texture_logo.height / 2,
+                               texture_logo.width, texture_logo.height},
                    (Vector2){0, 0}, 0.0f, Fade(WHITE, logoOpacity));
     EndDrawing();
 }
 
-void DrawMenu(Texture2D dinosaurio, int frame, float runningTime, float frameTime, Texture2D sombra, Music music, Font fuente)
+void DrawMenu(int frame, float runningTime, float frameTime)
 {
     /**************************************** DISEñO DE MENU ********************************************/
     BeginDrawing();
@@ -263,12 +247,12 @@ void DrawMenu(Texture2D dinosaurio, int frame, float runningTime, float frameTim
     generte_rec();
     /****************************************** DINOSAURIO  **********************************************/
     int maxFrames = 24;
-    generate_dinos(frame, runningTime, frameTime, dinosaurio, sombra, (float)screenWidth / 12, (float)screenHeight / 1.9, maxFrames, 1);
+    generate_dinos(frame, runningTime, frameTime, dino1, (float)screenWidth / 12, (float)screenHeight / 1.9, maxFrames, 1);
     /******************************************** Dibujar mensajes **************************************************/
-    texto_sencillo("Jugar", 0.532, 70, 2, 2, false, fuente);
-    texto_sencillo("Personajes", 0.615, 70, 2, 0.5905, true, fuente);
-    texto_sencillo("Opciones", 0.697, 70, 2, 0.67545, true, fuente);
-    texto_sencillo("Salir", 0.78, 70, 2, 0.755, true, fuente);
+    texto_sencillo("Jugar", 0.532, 70, 2, 2, false);
+    texto_sencillo("Personajes", 0.615, 70, 2, 0.5905, true);
+    texto_sencillo("Opciones", 0.697, 70, 2, 0.67545, true);
+    texto_sencillo("Salir", 0.78, 70, 2, 0.755, true);
     EndDrawing();
 }
 void UpdateMenu()
@@ -298,10 +282,8 @@ void UpdateMenu()
     }
 }
 
-void UpdateOptions(Music music, Music level1)
+void UpdateOptions()
 {
-    // Lógica de actualización de opciones
-
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
     {
         if (CheckMouseOnOptionY("Regresar", 70, 0.78))
@@ -341,7 +323,7 @@ void UpdateOptions(Music music, Music level1)
         }
     }
 }
-void DrawOptions(Texture2D dinosaurio, int frame, float runningTime, float frameTime, Texture2D sombra, Music music, Font fuente)
+void DrawOptions(int frame, float runningTime, float frameTime)
 {
     // Lógica de dibujo de opciones
     Color colo1 = {207, 207, 207, 255};
@@ -356,9 +338,9 @@ void DrawOptions(Texture2D dinosaurio, int frame, float runningTime, float frame
     /******************************* GENERAR RECTANGULO ******************************/
     generte_rec();
     /**************************** GENERAR DINOSAURIO  *******************************/
-    generate_dinos(frame, runningTime, frameTime, dinosaurio, sombra, screenWidth / 1.35, screenHeight / 2, 24, 1);
+    generate_dinos(frame, runningTime, frameTime, dino2, screenWidth / 1.35, screenHeight / 2, 24, 1);
     /********************************************************************************/
-    texto_sencillo("Efectos", 0.532, 70, 2.1, 2, false, fuente);
+    texto_sencillo("Efectos", 0.532, 70, 2.1, 2, false);
     if (soundPaused)
     {
         DrawText("ON", screenWidth / 1.559 - MeasureText("Efectos", 70) / 2, screenHeight / 1.96, 60, colo1);
@@ -367,7 +349,7 @@ void DrawOptions(Texture2D dinosaurio, int frame, float runningTime, float frame
     {
         DrawText("OFF", screenWidth / 1.559 - MeasureText("Efectos", 70) / 2, screenHeight / 1.96, 60, select);
     }
-    texto_sencillo("Musica", 0.655, 70, 2.1, 0.630, true, fuente);
+    texto_sencillo("Musica", 0.655, 70, 2.1, 0.630, true);
     if (musicPaused)
     {
         DrawText("OFF", screenWidth / 1.6 - MeasureText("Musica", 70) / 2, screenHeight * 0.640, 60, select);
@@ -376,12 +358,12 @@ void DrawOptions(Texture2D dinosaurio, int frame, float runningTime, float frame
     {
         DrawText("ON", screenWidth / 1.6 - MeasureText("Musica", 70) / 2, screenHeight * 0.640, 60, colo1);
     }
-    texto_sencillo("Regresar", 0.78, 70, 2, 0.755, true, fuente);
+    texto_sencillo("Regresar", 0.78, 70, 2, 0.755, true);
 
     EndDrawing();
 }
 
-void UpdateSelectGame(Sound sonido, Sound sonido2)
+void UpdateSelectGame()
 {
     Vector2 mousePosition = GetMousePosition();
     Rectangle LEVEL1_RECT = {screenWidth / 3.5, screenHeight / 2, 235, 250};
@@ -391,32 +373,34 @@ void UpdateSelectGame(Sound sonido, Sound sonido2)
     {
         if (CheckCollisionPointRec(mousePosition, LEVEL1_RECT))
         {
-            playsound(sonido2, soundPaused);
+            playsound(sound3, soundPaused);
             currentGameLevel = LEVEL1;
         }
         if (CheckCollisionPointRec(mousePosition, LEVEL2_RECT))
         {
-            playsound(sonido2, soundPaused);
+            playsound(sound3, soundPaused);
             currentGameLevel = LEVEL2;
         }
         if (CheckMouseOnOptionY("Regresar", 75, 0.920))
         {
-            playsound(sonido, soundPaused);
+            playsound(sound1, soundPaused);
             currentGameLevel = LEAVE;
         }
     }
 }
-void MainSelectGame(Music menu, Sound sonido, Sound sonido2, Texture2D espy, Texture2D nacky, Texture2D juan, Texture2D sombra)
+void MainSelectGame()
 {
     bool salir = false;
     /************************ Background SELECTGAME ******************************/
     Image background_selectgame = LoadImage("imagenes_danna\\background_selectgame.png");
     ImageResize(&background_selectgame, screenWidth, screenHeight);
-    Texture2D texture_selectgame = LoadTextureFromImage(background_selectgame);
+    Texture2D selectgame_txt = LoadTextureFromImage(background_selectgame);
     UnloadImage(background_selectgame);
     /***************************  Imagenes de niveles *******************************/
-    Texture2D level1 = LoadTexture("imagenes_danna\\selectLevel1-removebg-preview.png");
-    Texture2D level2 = LoadTexture("imagenes_danna\\selectLevel2-removebg-preview.png");
+    Texture2D level1_txt = LoadTexture("imagenes_danna\\selectLevel1-removebg-preview.png");
+    Texture2D level2_txt = LoadTexture("imagenes_danna\\selectLevel2-removebg-preview.png");
+    Texture2D estrellas_vacias = LoadTexture("imagenes_danna\\estrellas_vacias.png");
+    Texture2D estrellas = LoadTexture("imagenes_danna\\estrellas.png");
     Vector2 postionTexture = {(float)screenWidth / 2 - (float)screenWidth / 2, (float)screenHeight / 2 - (float)screenHeight / 2};
     /******* textura selecciona un nivel*******/
     Texture2D selecNivel = LoadTexture("imagenes_danna\\SELECCIONA_UN_NIVEL.png");
@@ -467,10 +451,10 @@ void MainSelectGame(Music menu, Sound sonido, Sound sonido2, Texture2D espy, Tex
         switch (currentGameLevel)
         {
         case WAITING:
-            UpdateSelectGame(sonido, sonido2);
-            DrawTextureEx(texture_selectgame, postionTexture, 0, 1.0f, WHITE); // fondo
-            DrawTextureEx(selecNivel, positionZero, 0, 1.0f, WHITE);           // imagen selecciona un nivel
-            DrawSelectGame(level1, level2, menu, espy, nacky, juan, sombra, frame, runningTime, frameTime);
+            UpdateSelectGame();
+            DrawTextureEx(selectgame_txt, postionTexture, 0, 1.0f, WHITE); // fondo
+            DrawTextureEx(selecNivel, positionZero, 0, 1.0f, WHITE);       // imagen selecciona un nivel
+            DrawSelectGame(level1_txt, level2_txt, estrellas_vacias, estrellas, frame, runningTime, frameTime);
             break;
         case LEVEL1:
             DrawGameLv1(gameMatrix, squareMatrixColor, preColors);
@@ -486,19 +470,20 @@ void MainSelectGame(Music menu, Sound sonido, Sound sonido2, Texture2D espy, Tex
         }
     } while (!WindowShouldClose() && !salir);
 
-    UnloadTexture(level1);
-    UnloadTexture(level2);
+    UnloadTexture(estrellas_vacias);
+    UnloadTexture(level1_txt);
+    UnloadTexture(level2_txt);
     UnloadTexture(selecNivel);
-    UnloadTexture(texture_selectgame);
+    UnloadTexture(selectgame_txt);
 }
 
-void DrawSelectGame(Texture2D txt_leve1, Texture2D txt_level2, Music musica, Texture2D espy, Texture2D nacky, Texture2D juan, Texture2D sombra, int frame, float runningTime, float frameTime)
+void DrawSelectGame(Texture2D txt_leve1, Texture2D txt_level2, Texture2D estrellas_vacias, Texture2D estrellas, int frame, float runningTime, float frameTime)
 {
     BeginDrawing();
     ClearBackground(WHITE);
     if (!musicPaused)
     {
-        UpdateMusicStream(musica);
+        UpdateMusicStream(level1);
     }
     Vector2 pos_level1 = {screenWidth / 3.5, screenHeight / 2};
     Vector2 pos_level2 = {screenWidth / 1.79, screenHeight / 2};
@@ -507,42 +492,34 @@ void DrawSelectGame(Texture2D txt_leve1, Texture2D txt_level2, Music musica, Tex
     Color rectangleColor = {0, 0, 0, 128};
     Color border = {0, 0, 0, 220};
 
-    Color select = {255, 200, 0, 255};
-    float fontSize = 80.0f + 10.0f * sinf(GetTime() * 8.0f);
-
-    if (CheckMouseOnOptionY("Regresar", 75, 0.920))
-    {
-        DrawText("Regresar", screenWidth / 2 - MeasureText("Regresar", fontSize) / 2, screenHeight * 0.860, fontSize, select);
-    }
-    else
-    {
-        DrawText("Regresar", screenWidth / 2 - MeasureText("Regresar", 70) / 2, screenHeight * 0.860, 70, WHITE);
-    }
+    texto_sencillo("Regresar", 0.920, 75, 2, 0.860, 1);
 
     DrawRectangleRoundedLines(rec, .30, .20, 13.f, border);
     DrawRectangleRounded(rec, .30, .50, rectangleColor);
 
     DrawTextureEx(txt_leve1, pos_level1, 0, 1.0f, WHITE);
+    DrawTexture(estrellas_vacias, screenWidth / 3.5, screenHeight / 1.38, WHITE); // hacer un if de que si no ha jugado no hay estrellas y si si se dibujan las pintadas
+    DrawTexture(estrellas, screenWidth / 1.79, screenHeight / 1.38, WHITE);
     DrawTextureEx(txt_level2, pos_level2, 0, 1.0f, WHITE);
     /***********************************  Dibujar dinosaurio que escogio el usuario *******************************************/
     if (selectDino == 1)
     {
         // dibujar a espy
-        generate_dinos(frame, runningTime, frameTime, espy, sombra, screenWidth - 1850, screenHeight / 2.1, 24, 0);
+        generate_dinos(frame, runningTime, frameTime, dino1, screenWidth - 1850, screenHeight / 2.1, 24, 0);
     }
     else
     {
         if (selectDino == 2)
         {
             // dibujar a nacky
-            generate_dinos(frame, runningTime, frameTime, nacky, sombra, screenWidth - 1850, screenHeight / 2.1, 24, 0);
+            generate_dinos(frame, runningTime, frameTime, dino4, screenWidth - 1850, screenHeight / 2.1, 24, 0);
         }
         else
         {
             if (selectDino == 3)
             {
                 // dibujar a juan
-                generate_dinos(frame, runningTime, frameTime, juan, sombra, screenWidth - 1850, screenHeight / 2.1, 24, 0);
+                generate_dinos(frame, runningTime, frameTime, dino3, screenWidth - 1850, screenHeight / 2.1, 24, 0);
             }
         }
     }
@@ -569,7 +546,6 @@ void DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_
     static int inputLengthNumbers = 0;
 
     char number[4];
-
     Rectangle displayNumber = {0};
     int tempCorrectedGuess[2][2];
 
@@ -584,7 +560,9 @@ void DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_
 
     BeginDrawing();
     ClearBackground(BLACK);
-    // DrawRectangle(0, 0, 1920, 114, RED);
+    DrawRectangle(0, 0, 1920, 114, RED);
+    DrawRectangle(63, 215, 745, 328, BLUE);
+    DrawRectangle(150, 575, 550, 137, WHITE);
 
     for (int i = 0; i < MATRIX_HEIGHT; i++)
     {
@@ -707,7 +685,7 @@ void DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_
             int key = GetKeyPressed();
             if (key >= 48 && key <= 57)
             {
-                if (inputLengthNumbers < 4)
+                if (inputLengthNumbers < 2)
                 {
                     inputNumbers[inputLengthNumbers] = (char)key;
                     inputLengthNumbers++;
@@ -722,6 +700,11 @@ void DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_
                     inputLengthNumbers--;
                     inputNumbers[inputLengthNumbers] = '\0';
                 }
+            }
+            if (inputLengthNumbers == 0)
+            {
+                // Draw text "Ingresa la respuesta"
+                DrawText("Ingresa la respuesta", 200, 630, 40, GRAY);
             }
 
             if (IsKeyPressed(KEY_ENTER))
@@ -760,7 +743,8 @@ void DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_
             }
             else
             {
-                DrawText(inputNumbers, 100, 200, 200, BLUE); // Display numbers on screen. You can modify this for a different font.
+
+                DrawText(inputNumbers, 520, 580, 150, BLACK); // Display numbers on screen. You can modify this for a different font.
             }
         }
     }
@@ -780,7 +764,7 @@ bool UpdateGameLv1(int gameMatrix[][MATRIX_WIDTH], Vector2 position[], int userI
 }
 
 //******************************   DINOSAURIOS   *************************************
-void DrawCustome(Texture2D dino, Texture2D dino2, Texture2D dino3, Texture2D sombra, int frame, float runningTime, float frameTime, Music music, Font fuente)
+void DrawCustome(int frame, float runningTime, float frameTime)
 {
     BeginDrawing();
     ClearBackground(WHITE);
@@ -796,46 +780,46 @@ void DrawCustome(Texture2D dino, Texture2D dino2, Texture2D dino3, Texture2D som
     DrawRectangleRoundedLines(rec, .30, .20, 13.f, borde);
     DrawRectangleRounded(rec, .30, .50, rectangleColor);
     /***************************     animar texto      ***************************/
-    texto_sencillo("Regresar", 0.84, 70, 2, 0.800, true, fuente);
+    texto_sencillo("Regresar", 0.84, 70, 2, 0.800, true);
     /**********************************   dinosaurios  ****************************************/
     // X    Y
     if (CheckMouseOnOptionXandY("Espy", 70, 0.5, 0.43))
     {
         // DrawTexture(nameespy, screenWidth / 2 - MeasureText("Espy", 70) / 0.3, screenHeight / 2.5, WHITE);
         DrawText("Espy", screenWidth / 2 - MeasureText("Espy", 70) / 0.3, screenHeight / 2.5, 70, select);
-        generate_dinos(frame, runningTime, frameTime, dino, sombra, (screenWidth / 2 - MeasureText("Regresar", 90) / 2) - 400, 500.f, 24, 0);
+        generate_dinos(frame, runningTime, frameTime, dino1, (screenWidth / 2 - MeasureText("Regresar", 90) / 2) - 400, 500.f, 24, 0);
     }
     else
     {
         // DrawTexture(nameespy, screenWidth / 2 - MeasureText("Espy", 70) / 0.3, screenHeight / 2.5, WHITE);
 
         DrawText("Espy", screenWidth / 2 - MeasureText("Espy", 70) / 0.3, screenHeight / 2.5, 70, WHITE);
-        generate_dino_noAnimated(dino, 24, sombra, (screenWidth / 2 - MeasureText("Regresar", 90) / 2) - 400, 500.f);
+        generate_dino_noAnimated(dino1, 24, (screenWidth / 2 - MeasureText("Regresar", 90) / 2) - 400, 500.f);
     }
 
     if (CheckMouseOnOptionXandY("Nacky", 70, 1, 0.43))
     {
         DrawText("Nacky", screenWidth / 2 - MeasureText("Nacky", 70) / 2, screenHeight / 2.5, 70, select);
-        generate_dinos(frame, runningTime, frameTime, dino2, sombra, screenWidth / 2 - MeasureText("Regresar", 90) / 2, 500.f, 24, 0);
+        generate_dinos(frame, runningTime, frameTime, dino4, screenWidth / 2 - MeasureText("Regresar", 90) / 2, 500.f, 24, 0);
     }
     else
     {
         DrawText("Nacky", screenWidth / 2 - MeasureText("Nacky", 70) / 2, screenHeight / 2.5, 70, WHITE);
-        generate_dino_noAnimated(dino2, 24, sombra, screenWidth / 2 - MeasureText("Regresar", 90) / 2, 500.f);
+        generate_dino_noAnimated(dino4, 24, screenWidth / 2 - MeasureText("Regresar", 90) / 2, 500.f);
     }
     if (CheckMouseOnOptionXandY("Juan", 80, 1.4, 0.43))
     {
         DrawText("Juan", screenWidth / 1.4 - MeasureText("Juan", 70) / 2, screenHeight / 2.5, 70, select);
-        generate_dinos(frame, runningTime, frameTime, dino3, sombra, (screenWidth / 2 - MeasureText("Regresar", 90) / 2) + 400, 500, 24, 0);
+        generate_dinos(frame, runningTime, frameTime, dino3, (screenWidth / 2 - MeasureText("Regresar", 90) / 2) + 400, 500, 24, 0);
     }
     else
     {
         DrawText("Juan", screenWidth / 1.4 - MeasureText("Juan", 70) / 2, screenHeight / 2.5, 70, WHITE);
-        generate_dino_noAnimated(dino3, 24, sombra, (screenWidth / 2 - MeasureText("Regresar", 90) / 2) + 400, 500.f);
+        generate_dino_noAnimated(dino3, 24, (screenWidth / 2 - MeasureText("Regresar", 90) / 2) + 400, 500.f);
     }
     EndDrawing();
 }
-void UpdateCustome(Texture2D selectPers)
+void UpdateCustome()
 {
     // Lógica de actualización de créditos
     float fontSize = 80.0f + 10.0f * sinf(GetTime() * 8.0f);
@@ -882,7 +866,7 @@ void UpdateCustome(Texture2D selectPers)
     }
 }
 
-void generate_dinos(int frame, float runningTime, float frameTime, Texture2D dinosaurio, Texture2D sombra, float posX, float posY, int maxFrames, int op)
+void generate_dinos(int frame, float runningTime, float frameTime, Texture2D dinosaurio, float posX, float posY, int maxFrames, int op)
 {
     Rectangle dest = {posX, posY, 15 * (float)dinosaurio.width / maxFrames, 15 * (float)dinosaurio.height};
     Rectangle source = {frame * (float)dinosaurio.width / maxFrames, 0.f, (float)dinosaurio.width / maxFrames, (float)dinosaurio.height};
@@ -897,7 +881,7 @@ void generate_dinos(int frame, float runningTime, float frameTime, Texture2D din
     }
     DrawTexturePro(dinosaurio, source, dest, origin, 0.f, WHITE);
 }
-void generate_dino_noAnimated(Texture2D dinosaurio, int maxFrames, Texture2D sombra, float posX, float posY)
+void generate_dino_noAnimated(Texture2D dinosaurio, int maxFrames, float posX, float posY)
 {
     Rectangle source = {0.f, 0.f, (float)dinosaurio.width / maxFrames, (float)dinosaurio.height};
     Rectangle dest = {posX, posY, 15 * (float)dinosaurio.width / maxFrames, 15 * (float)dinosaurio.height};
@@ -1129,13 +1113,52 @@ double easeInOutCirc(double x)
 
 //**************************** FUNCIONES EXTRAS *************************
 
+void cargar_texturas(void)
+{
+    music = LoadMusicStream("audios_danna\\menu_musica.mp3");
+    level1 = LoadMusicStream("audios_danna\\LEVEL_.mp3");
+    /*********************************** SONIDOS ***********************************/
+    sound1 = LoadSound("audios_danna\\sonido-menu.wav");
+    sound2 = LoadSound("audios_danna\\selectDino.mp3");
+    sound3 = LoadSound("audios_danna\\selectLevel.mp3");
+    icon = LoadImage("imagenes_danna\\icon.png");
+    /************************ FUENTES ****************************/
+    fonT = LoadFont("fuentes_danna\\Pixellari.ttf");
+    /**************************** Background OPTIONS  ******************************/
+    background_options = LoadImage("imagenes_danna\\background_options.png");
+    ImageResize(&background_options, screenWidth, screenHeight);
+    texture_options = LoadTextureFromImage(background_options);
+    UnloadImage(background_options);
+    /**************************** Background START  ********************************/
+    som = LoadImage("imagenes_danna\\sheets\\shadow_2.png");
+    ImageResize(&som, 200, 200);
+    sombra = LoadTextureFromImage(som);
+    texture_logo = LoadTexture("imagenes_danna\\logo.png");
+    background_start = LoadImage("imagenes_danna\\background_menu.png");
+    ImageResize(&background_start, screenWidth, screenHeight);
+    texture_start = LoadTextureFromImage(background_start);
+    UnloadImage(som);
+    UnloadImage(background_start);
+    /***************************** Background CUSTOME **********************************/
+    background_custome = LoadImage("imagenes_danna\\background_level2.png");
+    ImageResize(&background_custome, screenWidth, screenHeight);
+    texture_custome = LoadTextureFromImage(background_custome);
+    UnloadImage(background_custome);
+    selectPers = LoadTexture("imagenes_danna\\SELECCIONA UN PERSONAJE (1).png");
+    /********************************** Dinosaurios ***********************************/
+    dino1 = LoadTexture("imagenes_danna\\sheets\\DinoSprites - doux.png");
+    dino2 = LoadTexture("imagenes_danna\\sheets\\DinoSprites - vita.png");
+    dino3 = LoadTexture("imagenes_danna\\sheets\\DinoSprites - mort.png");
+    dino4 = LoadTexture("imagenes_danna\\sheets\\DinoSprites - tard.png");
+}
+
 int getRandomNumber(int ri, int rf)
 {
     int range = (rf - ri + 1);
     return rand() % range + ri;
 }
 
-void texto_sencillo(char texto[], float posicion, float font, float x, float y, bool mult, Font fonT)
+void texto_sencillo(char texto[], float posicion, float font, float x, float y, bool mult)
 {
     float fontSize = 80.0f + 10.0f * sinf(GetTime() * 8.0f);
     Color select = {255, 200, 0, 255};
