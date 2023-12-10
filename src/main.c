@@ -42,6 +42,7 @@ Image background_start;
 Texture2D texture_start;
 Image background_custome;
 Texture2D texture_custome;
+Texture2D listo;
 Texture2D selectPers;
 Texture2D dino1;
 Texture2D dino2;
@@ -54,7 +55,6 @@ const int screenHeight = 1080;
 static bool musicPaused = false;
 static bool soundPaused = true;
 bool flagLoadTextures = false;
-
 /*************** JUEGO GLOBALES IMPORTANTES**************************/
 #define MATRIX_WIDTH 9
 #define MATRIX_HEIGHT 7
@@ -80,7 +80,7 @@ void MainSelectGame();
 void DrawSelectGame(Texture2D txt_leve1, Texture2D txt_level2, Texture2D estrellas_vacias, Texture2D estrellas, int frame, float runningTime, float frameTime);
 
 /*        ************************ NIVELES **************************************         */
-void DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_WIDTH], Color preColors[]);
+void DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_WIDTH], Color preColors[], Texture2D fondo, Texture2D icono, Vector2 posicion, int frame, float runningTime, float frameTime, Texture2D bordes);
 bool UpdateGameLv1(int gameMatrix[][MATRIX_WIDTH], Vector2 position[], int userInput);
 //******************************   DINOSAURIOS   *************************************
 void DrawCustome(int frame, float runningTime, float frameTime);
@@ -396,6 +396,14 @@ void MainSelectGame()
     ImageResize(&background_selectgame, screenWidth, screenHeight);
     Texture2D selectgame_txt = LoadTextureFromImage(background_selectgame);
     UnloadImage(background_selectgame);
+    /****************************** Background NIVEL 1 *****************************/
+    Image bg_level1 = LoadImage("imagenes_danna\\background_level1.png");
+    ImageResize(&bg_level1, screenWidth, screenHeight);
+    Texture2D bg_level1_txt = LoadTextureFromImage(bg_level1);
+    UnloadImage(bg_level1);
+    /*********************************** Texturas niveles **************************************/
+    Texture2D bordes = LoadTexture("imagenes_danna\\diseno_numeros.png");
+    Texture2D icono = LoadTextureFromImage(icon);
     /***************************  Imagenes de niveles *******************************/
     Texture2D level1_txt = LoadTexture("imagenes_danna\\selectLevel1-removebg-preview.png");
     Texture2D level2_txt = LoadTexture("imagenes_danna\\selectLevel2-removebg-preview.png");
@@ -453,11 +461,11 @@ void MainSelectGame()
         case WAITING:
             UpdateSelectGame();
             DrawTextureEx(selectgame_txt, postionTexture, 0, 1.0f, WHITE); // fondo
-            DrawTextureEx(selecNivel, positionZero, 0, 1.0f, WHITE);       // imagen selecciona un nivel
+            DrawTexture(selecNivel, 250, 150, WHITE); // imagen selecciona un nivel
             DrawSelectGame(level1_txt, level2_txt, estrellas_vacias, estrellas, frame, runningTime, frameTime);
             break;
         case LEVEL1:
-            DrawGameLv1(gameMatrix, squareMatrixColor, preColors);
+            DrawGameLv1(gameMatrix, squareMatrixColor, preColors, bg_level1_txt, icono, postionTexture, frame, runningTime, frameTime, bordes);
             break;
         case LEVEL2:
             BeginDrawing();
@@ -469,7 +477,10 @@ void MainSelectGame()
             break;
         }
     } while (!WindowShouldClose() && !salir);
-
+    UnloadTexture(icono);
+    UnloadTexture(bordes);
+    UnloadTexture(bg_level1_txt);
+    UnloadTexture(estrellas);
     UnloadTexture(estrellas_vacias);
     UnloadTexture(level1_txt);
     UnloadTexture(level2_txt);
@@ -485,10 +496,10 @@ void DrawSelectGame(Texture2D txt_leve1, Texture2D txt_level2, Texture2D estrell
     {
         UpdateMusicStream(level1);
     }
-    Vector2 pos_level1 = {screenWidth / 3.5, screenHeight / 2};
-    Vector2 pos_level2 = {screenWidth / 1.79, screenHeight / 2};
+    Vector2 pos_level1 = {screenWidth / 3.5, screenHeight / 2.3};
+    Vector2 pos_level2 = {screenWidth / 1.79, screenHeight / 2.3};
 
-    Rectangle rec = {screenWidth / 4.5, screenHeight / 2.01, screenWidth / 1.79, screenHeight / 3};
+    Rectangle rec = {screenWidth / 4.5, screenHeight / 2.3, screenWidth / 1.79, screenHeight / 3};
     Color rectangleColor = {0, 0, 0, 128};
     Color border = {0, 0, 0, 220};
 
@@ -498,8 +509,8 @@ void DrawSelectGame(Texture2D txt_leve1, Texture2D txt_level2, Texture2D estrell
     DrawRectangleRounded(rec, .30, .50, rectangleColor);
 
     DrawTextureEx(txt_leve1, pos_level1, 0, 1.0f, WHITE);
-    DrawTexture(estrellas_vacias, screenWidth / 3.5, screenHeight / 1.38, WHITE); // hacer un if de que si no ha jugado no hay estrellas y si si se dibujan las pintadas
-    DrawTexture(estrellas, screenWidth / 1.79, screenHeight / 1.38, WHITE);
+    DrawTexture(estrellas_vacias, screenWidth / 3.5, screenHeight / 1.52, WHITE); // hacer un if de que si no ha jugado no hay estrellas y si si se dibujan las pintadas
+    DrawTexture(estrellas, screenWidth / 1.79, screenHeight / 1.52, WHITE);
     DrawTextureEx(txt_level2, pos_level2, 0, 1.0f, WHITE);
     /***********************************  Dibujar dinosaurio que escogio el usuario *******************************************/
     if (selectDino == 1)
@@ -528,7 +539,7 @@ void DrawSelectGame(Texture2D txt_leve1, Texture2D txt_level2, Texture2D estrell
 }
 
 //******************************** NIVELES ******************************************
-void DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_WIDTH], Color preColors[])
+void DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_WIDTH], Color preColors[], Texture2D fondo, Texture2D icono, Vector2 posicion, int frame, float runningTime, float frameTime, Texture2D bordes)
 {
     // Calculates position of the matrix on the screen
     int matrixX = 405 + (screenWidth - MATRIX_WIDTH * (RECTANGLE_SIZE + 10)) / 2;
@@ -560,9 +571,42 @@ void DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_
 
     BeginDrawing();
     ClearBackground(BLACK);
-    DrawRectangle(0, 0, 1920, 114, RED);
-    DrawRectangle(63, 215, 745, 328, BLUE);
-    DrawRectangle(150, 575, 550, 137, WHITE);
+
+    Rectangle rec = {63, 215, 762, 305};
+    Rectangle rec2 = {150, 552, 600, 150};
+    Rectangle rec3 = {860, 200, 1000, 780};
+    Color rectangleColor = {0, 0, 0, 140};
+    Vector2 pos = {375, 285};
+    DrawTextureEx(fondo, posicion, 0, 1.0f, WHITE);
+    DrawRectangleRounded(rec2, .30, .50, rectangleColor);
+    DrawRectangleRounded(rec, .35, .50, rectangleColor);
+    DrawRectangleRounded(rec3, .10, .50, rectangleColor);
+    DrawRectangle(0, screenHeight * 0.0001, 1920, 140, BLACK);
+    DrawTexture(bordes, 50, 200, WHITE);
+    DrawTexture(icono, screenHeight * 0.0001, screenHeight / 2, WHITE);
+    DrawTextEx(fonT, "+", pos, 220, 0, WHITE);
+
+    if (selectDino == 1)
+    {
+        // dibujar a espy
+        generate_dinos(frame, runningTime, frameTime, dino1, screenWidth - 1900, screenHeight / 1.5, 24, 0);
+    }
+    else
+    {
+        if (selectDino == 2)
+        {
+            // dibujar a nacky
+            generate_dinos(frame, runningTime, frameTime, dino4, screenWidth - 1900, screenHeight / 1.5, 24, 0);
+        }
+        else
+        {
+            if (selectDino == 3)
+            {
+                // dibujar a juan
+                generate_dinos(frame, runningTime, frameTime, dino3, screenWidth - 1900, screenHeight / 1.5, 24, 0);
+            }
+        }
+    }
 
     for (int i = 0; i < MATRIX_HEIGHT; i++)
     {
@@ -653,8 +697,8 @@ void DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_
 
         textX = displayNumber.x + (displayNumber.width - MeasureText(number, displayNumber.height)) / 2;
         textY = displayNumber.y;
-
-        DrawText(number, textX, textY, 150, WHITE); // Modify this if you want to change how it looks like. TextX and TextY must be the position.
+        Vector2 pos1 = {textX, textY};
+        DrawTextEx(fonT, number, pos1, 150, 0, WHITE);
         drawMatrixSelected(number1, gameMatrix, matrixX, matrixY, (int)isMousePressedCollision[0].x, (int)isMousePressedCollision[0].y, number, preColors, squareMatrixColor[(int)isMousePressedCollision[0].x][(int)isMousePressedCollision[0].y]);
 
         if (pressedButtonNo2Flag)
@@ -667,8 +711,9 @@ void DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_
             snprintf(number, sizeof(number), "%d", gameMatrix[(int)isMousePressedCollision[1].x][(int)isMousePressedCollision[1].y]);
             textX = displayNumber.x + (displayNumber.width - MeasureText(number, displayNumber.height)) / 2;
             textY = displayNumber.y;
+            Vector2 pos2 = {textX, textY};
 
-            DrawText(number, textX, textY, 150, WHITE);
+            DrawTextEx(fonT, number, pos2, 150, 0, WHITE);
             drawMatrixSelected(number2, gameMatrix, matrixX, matrixY, (int)isMousePressedCollision[1].x, (int)isMousePressedCollision[1].y, number, preColors, squareMatrixColor[(int)isMousePressedCollision[1].x][(int)isMousePressedCollision[1].y]);
         }
     }
@@ -704,7 +749,8 @@ void DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_
             if (inputLengthNumbers == 0)
             {
                 // Draw text "Ingresa la respuesta"
-                DrawText("Ingresa la respuesta", 200, 630, 40, GRAY);
+                Vector2 pos2 = {215, 600};
+                DrawTextEx(fonT, "Ingresa la respuesta", pos2, 50, 0, WHITE);
             }
 
             if (IsKeyPressed(KEY_ENTER))
@@ -743,8 +789,9 @@ void DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_
             }
             else
             {
-
-                DrawText(inputNumbers, 520, 580, 150, BLACK); // Display numbers on screen. You can modify this for a different font.
+                Vector2 pos3 = {390, 560};
+                DrawTextEx(fonT, inputNumbers, pos3, 155, 0, YELLOW);
+                // DrawText(inputNumbers, 520, 580, 150, BLACK); // Display numbers on screen. You can modify this for a different font.
             }
         }
     }
@@ -822,9 +869,7 @@ void DrawCustome(int frame, float runningTime, float frameTime)
 void UpdateCustome()
 {
     // Lógica de actualización de créditos
-    float fontSize = 80.0f + 10.0f * sinf(GetTime() * 8.0f);
     static bool mostrarMensaje = false;
-    Vector2 positionZero = {screenWidth / 2 - selectPers.width / 2, screenHeight / 2 - selectPers.height * 3};
 
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
     {
@@ -857,12 +902,12 @@ void UpdateCustome()
     if (mostrarMensaje)
     {
         // aqui se debe de dibujar la imagen LISTO con probablemente estas posiciones, puede que se tenga que cambiar la posicion Y
-        DrawText("LISTO", screenWidth / 2.35 - MeasureText("LISTO", fontSize) / 2, screenHeight / 4, fontSize * 2.0f, BLACK);
+        DrawTexture(listo, 550, screenHeight / 7, WHITE);
     }
     else
     {
         // cambiar la textura por la de brayan
-        DrawTextureEx(selectPers, positionZero, 0, 1.0f, WHITE);
+        DrawTexture(selectPers, 250, screenHeight / 7, WHITE);
     }
 }
 
@@ -1144,7 +1189,8 @@ void cargar_texturas(void)
     ImageResize(&background_custome, screenWidth, screenHeight);
     texture_custome = LoadTextureFromImage(background_custome);
     UnloadImage(background_custome);
-    selectPers = LoadTexture("imagenes_danna\\SELECCIONA UN PERSONAJE (1).png");
+    selectPers = LoadTexture("imagenes_danna\\select_character.png");
+    listo = LoadTexture("imagenes_danna\\listo.png");
     /********************************** Dinosaurios ***********************************/
     dino1 = LoadTexture("imagenes_danna\\sheets\\DinoSprites - doux.png");
     dino2 = LoadTexture("imagenes_danna\\sheets\\DinoSprites - vita.png");
