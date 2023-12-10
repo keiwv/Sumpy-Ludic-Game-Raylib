@@ -34,6 +34,7 @@ Sound sound3;
 Image icon;
 Music music;
 Music level1;
+Music NIVEL1;
 Image background_options;
 Texture2D texture_options;
 Image som;
@@ -51,6 +52,8 @@ Texture2D dino3;
 Texture2D dino4;
 Texture2D mnsj_correcto;
 Texture2D mnsj_incorrecto;
+Texture2D borde;
+Texture2D ajustes;
 bool waiting = true;
 int selectDino = 0;
 const int screenWidth = 1920;
@@ -58,6 +61,7 @@ const int screenHeight = 1080;
 static bool musicPaused = false;
 static bool soundPaused = true;
 bool flagLoadTextures = false;
+bool mostrar_mnsj = false;
 /*************** JUEGO GLOBALES IMPORTANTES**************************/
 #define MATRIX_WIDTH 9
 #define MATRIX_HEIGHT 7
@@ -118,6 +122,7 @@ int main()
     InitAudioDevice();
     cargar_texturas();
     SetWindowIcon(icon);
+    PlayMusicStream(NIVEL1);
     PlayMusicStream(music);
     PlayMusicStream(level1);
     /****************************  Movimiento dinosaurio ****************************/
@@ -194,6 +199,7 @@ int main()
     UnloadTexture(texture_options);
 
     UnloadSound(sound1);
+    UnloadMusicStream(NIVEL1);
     UnloadMusicStream(level1);
     UnloadMusicStream(music);
     CloseAudioDevice();
@@ -413,6 +419,8 @@ void MainSelectGame()
     Texture2D icono = LoadTextureFromImage(icon);
     mnsj_correcto = LoadTexture("imagenes_danna\\mnsj_correcto_dino.png");
     mnsj_incorrecto = LoadTexture("imagenes_danna\\mnsj_incorrecto.png");
+    borde = LoadTexture("imagenes_danna\\borde.png");
+    ajustes = LoadTexture("imagenes_danna\\ajustes.png");
     /***************************  Imagenes de niveles *******************************/
     Texture2D level1_txt = LoadTexture("imagenes_danna\\selectLevel1-removebg-preview.png");
     Texture2D level2_txt = LoadTexture("imagenes_danna\\selectLevel2-removebg-preview.png");
@@ -490,6 +498,9 @@ void MainSelectGame()
             break;
         }
     } while (!WindowShouldClose() && !salir);
+    UnloadTexture(ajustes);
+    UnloadTexture(borde);
+    UnloadTexture(mnsj_incorrecto);
     UnloadTexture(mnsj_correcto);
     UnloadTexture(icono);
     UnloadTexture(bordes);
@@ -556,6 +567,10 @@ void DrawSelectGame(Texture2D txt_leve1, Texture2D txt_level2, Texture2D estrell
 void DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_WIDTH], Color preColors[], Texture2D fondo, Texture2D icono, Vector2 posicion, int frame, float runningTime, float frameTime, Texture2D bordes)
 {
     // Calculates position of the matrix on the screen
+    if (!musicPaused)
+    {
+        UpdateMusicStream(NIVEL1);
+    }
     int matrixX = 405 + (screenWidth - MATRIX_WIDTH * (RECTANGLE_SIZE + 10)) / 2;
     int matrixY = 50 + (screenHeight - MATRIX_HEIGHT * (RECTANGLE_SIZE + 10)) / 2;
 
@@ -583,6 +598,7 @@ void DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_
 
     Rectangle enlargedRect = {0}; // Temp rectangle to save where the rectangle did collision, so it can be displayed with an animation
 
+    int movimientos = 0;
     BeginDrawing();
     ClearBackground(BLACK);
     /**** dibujar cosas necesarias para nivel  ***/
@@ -595,32 +611,33 @@ void DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_
     DrawRectangleRounded(rec2, .30, .50, rectangleColor);
     DrawRectangleRounded(rec, .35, .50, rectangleColor);
     DrawRectangleRounded(rec3, .10, .50, rectangleColor);
-    DrawRectangle(0, screenHeight * 0.0001, 1920, 140, BLACK);
+    DrawTexture(borde, 0, 0, WHITE);
+    // DrawRectangle(0, screenHeight * 0.0001, 1920, 140, BLACK);
     DrawTexture(bordes, 50, 200, WHITE);
     // DrawTexture(icono, screenHeight * 0.0001, screenHeight / 2, WHITE); // modificar eso
     DrawTextEx(fonT, "+", pos, 220, 0, WHITE);
     Vector2 pos_nivel = {40, 20};
     DrawTextEx(fonT, "Level 1", pos_nivel, 100, 0, WHITE);
-    DrawCircle(1850, 80, 50, WHITE); // ciruclo de ajustes
-
+    DrawTexture(ajustes,1800, 30, WHITE);
+    // DrawCircle(1850, 80, 50, WHITE); // ciruclo de ajustes
     if (selectDino == 1)
     {
         // dibujar a espy
-        generate_dinos(frame, runningTime, frameTime, dino1, screenWidth - 1900, screenHeight / 1.5, 24, 0);
+        generate_dinos(frame, runningTime, frameTime, dino1, screenWidth - 2000, screenHeight / 1.45, 24, 0);
     }
     else
     {
         if (selectDino == 2)
         {
             // dibujar a nacky
-            generate_dinos(frame, runningTime, frameTime, dino4, screenWidth - 1900, screenHeight / 1.5, 24, 0);
+            generate_dinos(frame, runningTime, frameTime, dino4, screenWidth - 2000, screenHeight / 1.45, 24, 0);
         }
         else
         {
             if (selectDino == 3)
             {
                 // dibujar a juan
-                generate_dinos(frame, runningTime, frameTime, dino3, screenWidth - 1900, screenHeight / 1.5, 24, 0);
+                generate_dinos(frame, runningTime, frameTime, dino3, screenWidth - 2000, screenHeight / 1.45, 24, 0);
             }
         }
     }
@@ -772,11 +789,11 @@ void DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_
 
             if (IsKeyPressed(KEY_ENTER))
             {
+                mostrar_mnsj = true;
                 if (inputLengthNumbers > 0)
                 {
                     bool resultFlag;
                     int userInput = atoi(inputNumbers);
-
                     resultFlag = verificar_suma(gameMatrix, isMousePressedCollision, userInput);
 
                     if (resultFlag)
@@ -815,12 +832,16 @@ void DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_
     }
     if (guessedRight)
     {
-        DrawTexture(mnsj_correcto, 250, 600, WHITE);
+        DrawTexture(mnsj_correcto, 200, 650, WHITE);
     }
     else
     {
-        DrawTexture(mnsj_incorrecto, 250, 600, WHITE);
+        if (mostrar_mnsj)
+        {
+            DrawTexture(mnsj_incorrecto, 200, 650, WHITE);
+        }
     }
+
     EndDrawing();
 }
 bool verificar_suma(int gameMatrix[][MATRIX_WIDTH], Vector2 position[], int userInput)
@@ -1291,6 +1312,7 @@ void cargar_texturas(void)
 {
     music = LoadMusicStream("audios_danna\\menu_musica.mp3");
     level1 = LoadMusicStream("audios_danna\\LEVEL_.mp3");
+    NIVEL1 = LoadMusicStream("audios_danna\\LEVEL_1.mp3");
     /*********************************** SONIDOS ***********************************/
     sound1 = LoadSound("audios_danna\\sonido-menu.wav");
     sound2 = LoadSound("audios_danna\\selectDino.mp3");
