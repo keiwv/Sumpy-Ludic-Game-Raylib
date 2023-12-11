@@ -56,6 +56,9 @@ Texture2D dino1;
 Texture2D dino2;
 Texture2D dino3;
 Texture2D dino4;
+Texture2D espy;
+Texture2D nacky;
+Texture2D juan;
 // main2
 Image background_selectgame;
 Texture2D selectgame_txt;
@@ -74,6 +77,8 @@ Texture2D borde;
 Texture2D ajustes;
 Texture2D estrellas_vacias_1;
 Texture2D perdiste;
+Music gameover;
+Music NIVEL2;
 bool waiting = true;
 int selectDino = 0;
 const int screenWidth = 1920;
@@ -160,9 +165,11 @@ int main()
     InitAudioDevice();
     cargar_texturas();
     SetWindowIcon(icon);
-    PlayMusicStream(NIVEL1);
     PlayMusicStream(music);
     PlayMusicStream(level1);
+    PlayMusicStream(gameover);
+    PlayMusicStream(NIVEL1);
+    PlayMusicStream(NIVEL2);
     /****************************  Movimiento dinosaurio ****************************/
     int frame = 0;
     float runningTime = 0;
@@ -236,11 +243,16 @@ int main()
     UnloadTexture(texture_logo);
     UnloadTexture(texture_start);
     UnloadTexture(texture_options);
+    UnloadTexture(espy);
+    UnloadTexture(nacky);
+    UnloadTexture(juan);
 
     UnloadSound(sound1);
     UnloadSound(sound2);
     UnloadSound(sound3);
+    UnloadMusicStream(gameover);
     UnloadMusicStream(NIVEL1);
+    UnloadMusicStream(NIVEL2);
     UnloadMusicStream(level1);
     UnloadMusicStream(music);
     CloseAudioDevice();
@@ -267,7 +279,6 @@ void logoLoading(int frameCounter)
                                texture_logo.width, texture_logo.height},
                    (Vector2){0, 0}, 0.0f, Fade(WHITE, value));
     ClearBackground(WHITE);
-    printf("%f\n", value);
     EndDrawing();
 }
 
@@ -993,6 +1004,7 @@ int DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_W
     if (intentos == 0)
     {
         PauseMusicStream(NIVEL1);
+        UpdateMusicStream(gameover);
         DrawGameOver();
     }
     EndDrawing();
@@ -1049,7 +1061,7 @@ int DrawGameLv2(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_W
 {
     if (!musicPaused)
     {
-        UpdateMusicStream(NIVEL1); // Modificar esto
+        UpdateMusicStream(NIVEL2);
     }
     int matrixX = 405 + (screenWidth - MATRIX_WIDTH * (RECTANGLE_SIZE + 10)) / 2;
     int matrixY = 50 + (screenHeight - MATRIX_HEIGHT * (RECTANGLE_SIZE + 10)) / 2;
@@ -1369,7 +1381,9 @@ int DrawGameLv2(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_W
     DrawTextEx(fonT, number, pos_pnt, 55, 1, WHITE);
     if (intentos == 0)
     {
-        DrawGameOver(); // Agregar musica y pausar aquí.
+        PauseMusicStream(NIVEL2);
+        DrawGameOver();
+        UpdateMusicStream(gameover);
     }
     EndDrawing();
 
@@ -1586,7 +1600,6 @@ void DrawCustome(int frame, float runningTime, float frameTime)
 {
     BeginDrawing();
     ClearBackground(WHITE);
-    Color select = {255, 200, 0, 255};
     if (!musicPaused)
     {
         UpdateMusicStream(music);
@@ -1601,38 +1614,39 @@ void DrawCustome(int frame, float runningTime, float frameTime)
     texto_sencillo("Regresar", 0.84, 70, 2, 0.800, true);
     /**********************************   dinosaurios  ****************************************/
     // X    Y
+    Vector2 pos_espy = {370, 420};
+    Vector2 pos_nacky = {780, 420};
+    Vector2 pos_juan = {1200, 420};
+
     if (CheckMouseOnOptionXandY("Espy", 70, 0.5, 0.43))
     {
-        // DrawTexture(nameespy, screenWidth / 2 - MeasureText("Espy", 70) / 0.3, screenHeight / 2.5, WHITE);
-        DrawText("Espy", screenWidth / 2 - MeasureText("Espy", 70) / 0.3, screenHeight / 2.5, 70, select);
+        DrawTextureEx(espy, pos_espy, 0, 1.0f, WHITE);
         generate_dinos(frame, runningTime, frameTime, dino1, (screenWidth / 2 - MeasureText("Regresar", 90) / 2) - 400, 500.f, 24, 0);
     }
     else
     {
-        // DrawTexture(nameespy, screenWidth / 2 - MeasureText("Espy", 70) / 0.3, screenHeight / 2.5, WHITE);
-
-        DrawText("Espy", screenWidth / 2 - MeasureText("Espy", 70) / 0.3, screenHeight / 2.5, 70, WHITE);
+        DrawTextureEx(espy, pos_espy, 0, 1.0f, WHITE);
         generate_dino_noAnimated(dino1, 24, (screenWidth / 2 - MeasureText("Regresar", 90) / 2) - 400, 500.f);
     }
 
     if (CheckMouseOnOptionXandY("Nacky", 70, 1, 0.43))
     {
-        DrawText("Nacky", screenWidth / 2 - MeasureText("Nacky", 70) / 2, screenHeight / 2.5, 70, select);
+        DrawTextureEx(nacky, pos_nacky, 0, 1.0f, WHITE);
         generate_dinos(frame, runningTime, frameTime, dino4, screenWidth / 2 - MeasureText("Regresar", 90) / 2, 500.f, 24, 0);
     }
     else
     {
-        DrawText("Nacky", screenWidth / 2 - MeasureText("Nacky", 70) / 2, screenHeight / 2.5, 70, WHITE);
+        DrawTextureEx(nacky, pos_nacky, 0, 1.0f, WHITE);
         generate_dino_noAnimated(dino4, 24, screenWidth / 2 - MeasureText("Regresar", 90) / 2, 500.f);
     }
     if (CheckMouseOnOptionXandY("Juan", 80, 1.4, 0.43))
     {
-        DrawText("Juan", screenWidth / 1.4 - MeasureText("Juan", 70) / 2, screenHeight / 2.5, 70, select);
+        DrawTextureEx(juan, pos_juan, 0, 1.0f, WHITE);
         generate_dinos(frame, runningTime, frameTime, dino3, (screenWidth / 2 - MeasureText("Regresar", 90) / 2) + 400, 500, 24, 0);
     }
     else
     {
-        DrawText("Juan", screenWidth / 1.4 - MeasureText("Juan", 70) / 2, screenHeight / 2.5, 70, WHITE);
+        DrawTextureEx(juan, pos_juan, 0, 1.0f, WHITE);
         generate_dino_noAnimated(dino3, 24, (screenWidth / 2 - MeasureText("Regresar", 90) / 2) + 400, 500.f);
     }
     EndDrawing();
@@ -2258,6 +2272,8 @@ void cargar_texturas(void)
     music = LoadMusicStream("audios_danna\\menu_musica.mp3");
     level1 = LoadMusicStream("audios_danna\\LEVEL_.mp3");
     NIVEL1 = LoadMusicStream("audios_danna\\LEVEL_1.mp3");
+    gameover = LoadMusicStream("audios_danna\\gameOver.mp3");
+    NIVEL2 = LoadMusicStream("audios_danna\\LEVEL2.mp3");
     /*********************************** SONIDOS ***********************************/
     sound1 = LoadSound("audios_danna\\sonido-menu.wav");
     sound2 = LoadSound("audios_danna\\selectDino.mp3");
@@ -2292,6 +2308,9 @@ void cargar_texturas(void)
     dino2 = LoadTexture("imagenes_danna\\sheets\\DinoSprites - vita.png");
     dino3 = LoadTexture("imagenes_danna\\sheets\\DinoSprites - mort.png");
     dino4 = LoadTexture("imagenes_danna\\sheets\\DinoSprites - tard.png");
+    espy = LoadTexture("imagenes_danna\\ESPY.png");
+    nacky = LoadTexture("imagenes_danna\\NACKY.png");
+    juan = LoadTexture("imagenes_danna\\JUAN.png");
 }
 
 void cargar_texturas_main2(void)
