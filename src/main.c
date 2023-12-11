@@ -434,7 +434,7 @@ void MainSelectGame()
     UnloadImage(bg_level1);
     /*********************************** Texturas niveles **************************************/
     Texture2D bordes = LoadTexture("imagenes_danna\\diseno_numeros.png");
-    Texture2D icono = LoadTextureFromImage(icon);
+    Texture2D icono = LoadTexture("imagenes_danna\\logoS.png");
     mnsj_correcto = LoadTexture("imagenes_danna\\mnsj_correcto_dino.png");
     mnsj_incorrecto = LoadTexture("imagenes_danna\\mnsj_incorrecto.png");
     borde = LoadTexture("imagenes_danna\\borde.png");
@@ -644,20 +644,31 @@ int DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_W
     Rectangle rec = {63, 215, 762, 305};
     Rectangle rec2 = {150, 552, 600, 150};
     Rectangle rec3 = {860, 200, 1000, 780};
+    Rectangle rec_pnts = {595, 740, 240, 240};
+    Rectangle rec_int = {1520, 990, 330, 65};
+
     Color rectangleColor = {0, 0, 0, 140};
+    Color rectangleColor2 = {0, 0, 0, 200};
     Vector2 pos = {375, 285};
     DrawTextureEx(fondo, posicion, 0, 1.0f, WHITE);
-    DrawRectangleRounded(rec2, .30, .50, rectangleColor);
+    DrawRectangleRounded(rec2, .30, .50, rectangleColor2);
     DrawRectangleRounded(rec, .35, .50, rectangleColor);
     DrawRectangleRounded(rec3, .10, .50, rectangleColor);
     DrawTexture(borde, 0, 0, WHITE);
-    // DrawRectangle(0, screenHeight * 0.0001, 1920, 140, BLACK);
     DrawTexture(bordes, 50, 200, WHITE);
-    // DrawTexture(icono, screenHeight * 0.0001, screenHeight / 2, WHITE); // modificar eso
+    DrawTexture(icono, screenWidth/2, 30, WHITE); // FALTTA PONER LOGO DE SUMPY
     DrawTextEx(fonT, "+", pos, 220, 0, WHITE);
-    Vector2 pos_nivel = {40, 20};
+    Vector2 pos_nivel = {40, 40};
     DrawTextEx(fonT, "Level 1", pos_nivel, 100, 0, WHITE);
     DrawTexture(ajustes, 1800, 30, WHITE);
+    DrawRectangleRounded(rec_pnts, 0.30, 0.50, rectangleColor);
+    Vector2 po_objt = {600, 750};
+    DrawTextEx(fonT, "Objetivo", po_objt, 60, 0, WHITE);
+    Vector2 pos_pnt = {600, 865};
+    DrawTextEx(fonT, "Puntos", pos_pnt, 60, 0, WHITE);
+    Vector2 pos_intentos = {1530, 995};
+    DrawRectangleRounded(rec_int, 0.35, 0.50, rectangleColor);
+    DrawTextEx(fonT, "Intentos:", pos_intentos, 60, 0, WHITE);
     // DrawCircle(1850, 80, 50, WHITE); // ciruclo de ajustes
     if (selectDino == 1)
     {
