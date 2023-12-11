@@ -85,6 +85,7 @@ char inputNumbers[11];
 int inputLengthNumbers = 0;
 int intentos = 20;
 bool returnFlag = false;
+bool leaveGameFlag = false;
 /********************************** PROTOTIPO DE FUNCIONES ************************************/
 /*      ************************ MANEJO DE ESCENARIOS Y JUEGO ***********************/
 void logoLoading(int frameCounter);
@@ -478,7 +479,7 @@ void MainSelectGame()
 
     Color preColors[3] = {GREEN, ORANGE, RED};
     int maxPoints[] = {2500, 4500};
-    TSaveProgress userProgression;
+    TSaveProgress userProgression = LoadProgressFile();
     TSaveProgress currentUserProgression = {0};
     currentUserProgression.lastPointsLevel1 = 0;
     currentUserProgression.lastPointsLevel2 = 0;
@@ -500,7 +501,11 @@ void MainSelectGame()
         switch (currentGameLevel)
         {
         case WAITING:
-            userProgression = LoadProgressFile();
+            if (leaveGameFlag)
+            {
+                userProgression = LoadProgressFile();
+                leaveGameFlag = false;
+            }
             UpdateSelectGame();
             DrawTextureEx(selectgame_txt, postionTexture, 0, 1.0f, WHITE); // fondo
             DrawTexture(selecNivel, 250, 150, WHITE);                      // imagen selecciona un nivel
@@ -509,6 +514,7 @@ void MainSelectGame()
         case LEVEL1:
             currentUserProgression.lastPointsLevel1 = DrawGameLv1(gameMatrix, squareMatrixColor, preColors, bg_level1_txt, icono, postionTexture, frame, runningTime, frameTime, bordes, maxPoints, currentUserProgression.lastPointsLevel1);
             UpdateGameLv1();
+            SaveProgressFile(currentUserProgression);
             break;
         case LEVEL2:
             BeginDrawing();
@@ -535,7 +541,6 @@ void MainSelectGame()
             pressedButtonNo1Flag = false;
             pressedButtonNo2Flag = false;
         }
-        SaveProgressFile(currentUserProgression);
     } while (!WindowShouldClose() && !salir);
     UnloadTexture(ajustes);
     UnloadTexture(borde);
@@ -1061,6 +1066,7 @@ void UpdateOptionLevel1()
             pressedButtonNo1Flag = false;
             pressedButtonNo2Flag = false;
             isMousePressedCollision[0].x = -1.0f;
+            leaveGameFlag = true;
         }
         if (CheckMouseOnOptionY("Regresar", 70, 0.70))
         {
