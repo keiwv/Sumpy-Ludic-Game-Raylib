@@ -30,7 +30,7 @@ typedef struct _SaveProgress
 } TSaveProgress;
 
 GameLevel currentGameLevel = WAITING;
-GameScene currentScene = START;
+GameScene currentScene = LOGO;
 Vector2 mousePosition = {0};
 /********************  VARIABLES Y CONSTANTES GLOBALES *************************/
 Font fonT;
@@ -56,11 +56,24 @@ Texture2D dino1;
 Texture2D dino2;
 Texture2D dino3;
 Texture2D dino4;
+// main2
+Image background_selectgame;
+Texture2D selectgame_txt;
+Image bg_level1;
+Texture2D bg_level1_txt;
+Texture2D bordes;
+Texture2D icono;
+Texture2D level1_txt;
+Texture2D level2_txt;
+Texture2D estrellas_vacias;
+Texture2D estrellas;
+Texture2D selecNivel;
 Texture2D mnsj_correcto;
 Texture2D mnsj_incorrecto;
 Texture2D borde;
 Texture2D ajustes;
 Texture2D estrellas_vacias_1;
+Texture2D perdiste;
 bool waiting = true;
 int selectDino = 0;
 const int screenWidth = 1920;
@@ -83,7 +96,7 @@ int validate = 0;
 char number[10];
 char inputNumbers[11];
 int inputLengthNumbers = 0;
-int intentos = 20;
+int intentos = 3;
 bool returnFlag = false;
 bool leaveGameFlag = false;
 /********************************** PROTOTIPO DE FUNCIONES ************************************/
@@ -99,13 +112,17 @@ void DrawOptions(int frame, float runningTime, float frameTime);
 void UpdateSelectGame();
 void MainSelectGame();
 
-void DrawSelectGame(Texture2D txt_leve1, Texture2D txt_level2, Texture2D estrellas_vacias, Texture2D estrellas, int frame, float runningTime, float frameTime, TSaveProgress userProgression, int maxPoints[]);
+void DrawSelectGame(int frame, float runningTime, float frameTime, TSaveProgress userProgression, int maxPoints[]);
 
 /*        ************************ NIVELES **************************************         */
-int DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_WIDTH], Color preColors[], Texture2D fondo, Texture2D icono, Vector2 posicion, int frame, float runningTime, float frameTime, Texture2D bordes, int maxPoints[], int currentPoints);
+int DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_WIDTH], Color preColors[], Vector2 posicion, int frame, float runningTime, float frameTime, int maxPoints[], int currentPoints);
 void UpdateGameLv1();
+int DrawGameLv2(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_WIDTH], Color preColors[], Vector2 posicion, int frame, float runningTime, float frameTime, int maxPoints[], int currentPoints);
+bool verificar_multi(int gameMatrix[][MATRIX_WIDTH], Vector2 position[], int userInput);
 void DrawOptionsLevel(int frame, float runningTime, float frameTime);
 void UpdateOptionLevel1();
+void DrawGameOver(void);
+void UpdateOptionLevel2();
 
 bool verificar_suma(int gameMatrix[][MATRIX_WIDTH], Vector2 position[], int userInput);
 //******************************   DINOSAURIOS   *************************************
@@ -121,10 +138,11 @@ void drawMatrixSelected(Rectangle number1, int gameMatrix[][MATRIX_WIDTH], int m
 int ValidateMatrix(int squareMatrixColor[][MATRIX_WIDTH], int positionX1, int positionY1, int positionX2, int positionY2);
 void modifyMatrix(int gameMatrix[][MATRIX_WIDTH], Color preColors[], int conditionModified, int squareMatrixColor[][MATRIX_WIDTH], int positionX1, int positionY1, int positionX2, int positionY2);
 double easeInOutCirc(double x);
-void animationChange(int squareMatrixColor[][MATRIX_WIDTH], int gameMatrix[][MATRIX_WIDTH], Color preColors[], Texture2D fondo, Texture2D icono, Vector2 posicion, int frame, float runningTime, float frameTime, Texture2D bordes, int maxPoints[], int currentPoints);
+void animationChange(int squareMatrixColor[][MATRIX_WIDTH], int gameMatrix[][MATRIX_WIDTH], Color preColors[], Vector2 posicion, int frame, float runningTime, float frameTime, int maxPoints[], int currentPoints, int maxPointsIndex);
 float animation2(float start, float end, float t);
 //**************************** FUNCIONES EXTRAS ************************
 void cargar_texturas(void);
+void cargar_texturas_main2(void);
 int getRandomNumber(int ri, int rf);
 void texto_sencillo(char texto[], float posicion, float font, float x, float y, bool mult);
 void playsound(Sound sonido, bool flag);
@@ -207,6 +225,7 @@ int main()
         }
     }
     UnloadFont(fonT);
+    UnloadTexture(listo);
     UnloadTexture(selectPers);
     UnloadTexture(texture_custome);
     UnloadTexture(sombra);
@@ -219,6 +238,8 @@ int main()
     UnloadTexture(texture_options);
 
     UnloadSound(sound1);
+    UnloadSound(sound2);
+    UnloadSound(sound3);
     UnloadMusicStream(NIVEL1);
     UnloadMusicStream(level1);
     UnloadMusicStream(music);
@@ -233,37 +254,20 @@ int main()
 /*      ************************ MANEJO DE ESCENARIOS ***********************/
 void logoLoading(int frameCounter)
 {
-    float logoOpacity = 0.0f;
-
-    if (frameCounter <= 500)
+    if (frameCounter == 3200)
     {
-
-        logoOpacity += 1.0f / 60.0f;
-    }
-
-    if (frameCounter > 60 && frameCounter <= 120)
-    {
-        logoOpacity = 1.0f;
-    }
-
-    if (frameCounter > 120 && frameCounter <= 180)
-    {
-
-        logoOpacity -= 1.0f / 60.0f;
-    }
-
-    if (frameCounter > 2000)
-    {
-
         currentScene = START;
     }
 
+    double value = fabs(sinf(0.001f * frameCounter));
+
     BeginDrawing();
-    ClearBackground(GREEN);
     DrawTexturePro(texture_logo, (Rectangle){0, 0, texture_logo.width, texture_logo.height},
                    (Rectangle){screenWidth / 2 - texture_logo.width / 2, screenHeight / 2 - texture_logo.height / 2,
                                texture_logo.width, texture_logo.height},
-                   (Vector2){0, 0}, 0.0f, Fade(WHITE, logoOpacity));
+                   (Vector2){0, 0}, 0.0f, Fade(WHITE, value));
+    ClearBackground(WHITE);
+    printf("%f\n", value);
     EndDrawing();
 }
 
@@ -425,32 +429,9 @@ void MainSelectGame()
 {
     bool salir = false;
     /************************ Background SELECTGAME ******************************/
-    Image background_selectgame = LoadImage("imagenes_danna\\background_selectgame.png");
-    ImageResize(&background_selectgame, screenWidth, screenHeight);
-    Texture2D selectgame_txt = LoadTextureFromImage(background_selectgame);
-    UnloadImage(background_selectgame);
-    /****************************** Background NIVEL 1 *****************************/
-    Image bg_level1 = LoadImage("imagenes_danna\\background_level1.png");
-    ImageResize(&bg_level1, screenWidth, screenHeight);
-    Texture2D bg_level1_txt = LoadTextureFromImage(bg_level1);
-    UnloadImage(bg_level1);
-    /*********************************** Texturas niveles **************************************/
-    Texture2D bordes = LoadTexture("imagenes_danna\\diseno_numeros.png");
-    Texture2D icono = LoadTexture("imagenes_danna\\logoS.png");
-    mnsj_correcto = LoadTexture("imagenes_danna\\mnsj_correcto_dino.png");
-    mnsj_incorrecto = LoadTexture("imagenes_danna\\mnsj_incorrecto.png");
-    borde = LoadTexture("imagenes_danna\\borde.png");
-    ajustes = LoadTexture("imagenes_danna\\ajustes.png");
-    /***************************  Imagenes de niveles *******************************/
-    Texture2D level1_txt = LoadTexture("imagenes_danna\\selectLevel1-removebg-preview.png");
-    Texture2D level2_txt = LoadTexture("imagenes_danna\\selectLevel2-removebg-preview.png");
-    Texture2D estrellas_vacias = LoadTexture("imagenes_danna\\estrellas_vacias.png");
-    estrellas_vacias_1 = LoadTexture("imagenes_danna\\estrella_vacia_1.png");
-    Texture2D estrellas = LoadTexture("imagenes_danna\\estrella.png");
-    Vector2 postionTexture = {(float)screenWidth / 2 - (float)screenWidth / 2, (float)screenHeight / 2 - (float)screenHeight / 2};
-    /******* textura selecciona un nivel*******/
-    Texture2D selecNivel = LoadTexture("imagenes_danna\\SELECCIONA_UN_NIVEL.png");
+    cargar_texturas_main2();
     /****************************  Movimiento dinosaurio ****************************/
+    Vector2 postionTexture = {(float)screenWidth / 2 - (float)screenWidth / 2, (float)screenHeight / 2 - (float)screenHeight / 2};
     int frame = 0;
     float runningTime = 0;
     const float frameTime = 1.0f / 10.0f;
@@ -458,11 +439,12 @@ void MainSelectGame()
     /**************************** GENERAR MATRIZ CON DATOS ALEATORIOS **********************/
     int gameMatrix[MATRIX_HEIGHT][MATRIX_WIDTH];
     int squareMatrixColor[MATRIX_HEIGHT][MATRIX_WIDTH];
+    int levelFlag = 0;
     for (int i = 0; i < MATRIX_HEIGHT; i++)
     {
         for (int j = 0; j < MATRIX_WIDTH; j++)
         {
-            gameMatrix[i][j] = getRandomNumber(1, 10);
+            gameMatrix[i][j] = getRandomNumber(1, 5);
             squareMatrixColor[i][j] = getRandomNumber(0, 2);
 
             if (j < MATRIX_WIDTH - 2 && squareMatrixColor[i][j] == squareMatrixColor[i][j + 1] && squareMatrixColor[i][j + 1] == squareMatrixColor[i][j + 2])
@@ -478,7 +460,7 @@ void MainSelectGame()
     }
 
     Color preColors[3] = {GREEN, ORANGE, RED};
-    int maxPoints[] = {2500, 4500};
+    int maxPoints[] = {2500, 1500};
     TSaveProgress userProgression = LoadProgressFile();
     TSaveProgress currentUserProgression = {0};
     currentUserProgression.lastPointsLevel1 = 0;
@@ -503,27 +485,43 @@ void MainSelectGame()
         case WAITING:
             if (leaveGameFlag)
             {
+                intentos = 3;
                 userProgression = LoadProgressFile();
                 leaveGameFlag = false;
+                PlayMusicStream(NIVEL1);
             }
             UpdateSelectGame();
             DrawTextureEx(selectgame_txt, postionTexture, 0, 1.0f, WHITE); // fondo
             DrawTexture(selecNivel, 250, 150, WHITE);                      // imagen selecciona un nivel
-            DrawSelectGame(level1_txt, level2_txt, estrellas_vacias, estrellas, frame, runningTime, frameTime, userProgression, maxPoints);
+            DrawSelectGame(frame, runningTime, frameTime, userProgression, maxPoints);
             break;
         case LEVEL1:
-            currentUserProgression.lastPointsLevel1 = DrawGameLv1(gameMatrix, squareMatrixColor, preColors, bg_level1_txt, icono, postionTexture, frame, runningTime, frameTime, bordes, maxPoints, currentUserProgression.lastPointsLevel1);
+            currentUserProgression.lastPointsLevel1 = DrawGameLv1(gameMatrix, squareMatrixColor, preColors, postionTexture, frame, runningTime, frameTime, maxPoints, currentUserProgression.lastPointsLevel1);
             UpdateGameLv1();
             SaveProgressFile(currentUserProgression);
             break;
         case LEVEL2:
-            BeginDrawing();
-            ClearBackground(WHITE);
-            EndDrawing();
+            if (leaveGameFlag)
+            {
+                userProgression = LoadProgressFile();
+                leaveGameFlag = false;
+            }
+            currentUserProgression.lastPointsLevel2 = DrawGameLv2(gameMatrix, squareMatrixColor, preColors, postionTexture, frame, runningTime, frameTime, maxPoints, currentUserProgression.lastPointsLevel2);
+            levelFlag = 1;
+            UpdateGameLv1();
+            SaveProgressFile(currentUserProgression);
             break;
         case OPTIONS2:
             DrawOptionsLevel(frame, runningTime, frameTime);
-            UpdateOptionLevel1();
+            if (levelFlag)
+            {
+                UpdateOptionLevel2();
+            }
+            else
+            {
+                UpdateOptionLevel1();
+            }
+
             break;
         case LEAVE:
             salir = true;
@@ -531,8 +529,6 @@ void MainSelectGame()
         }
         if (intentos == 0)
         {
-            currentGameLevel = WAITING;
-            intentos = 20;
             inputLengthNumbers = 0;
             inputNumbers[0] = '\0';
             mostrar_mnsj = false;
@@ -541,7 +537,9 @@ void MainSelectGame()
             pressedButtonNo1Flag = false;
             pressedButtonNo2Flag = false;
         }
+
     } while (!WindowShouldClose() && !salir);
+    UnloadTexture(perdiste);
     UnloadTexture(ajustes);
     UnloadTexture(borde);
     UnloadTexture(mnsj_incorrecto);
@@ -551,13 +549,14 @@ void MainSelectGame()
     UnloadTexture(bg_level1_txt);
     UnloadTexture(estrellas);
     UnloadTexture(estrellas_vacias);
+    UnloadTexture(estrellas_vacias_1);
     UnloadTexture(level1_txt);
     UnloadTexture(level2_txt);
     UnloadTexture(selecNivel);
     UnloadTexture(selectgame_txt);
 }
 
-void DrawSelectGame(Texture2D txt_leve1, Texture2D txt_level2, Texture2D estrellas_vacias, Texture2D estrellas, int frame, float runningTime, float frameTime, TSaveProgress userProgression, int maxPoints[])
+void DrawSelectGame(int frame, float runningTime, float frameTime, TSaveProgress userProgression, int maxPoints[])
 {
     BeginDrawing();
     ClearBackground(WHITE);
@@ -577,8 +576,8 @@ void DrawSelectGame(Texture2D txt_leve1, Texture2D txt_level2, Texture2D estrell
     DrawRectangleRoundedLines(rec, .30, .20, 13.f, border);
     DrawRectangleRounded(rec, .30, .50, rectangleColor);
 
-    DrawTextureEx(txt_leve1, pos_level1, 0, 1.0f, WHITE);
-    DrawTextureEx(txt_level2, pos_level2, 0, 1.0f, WHITE);
+    DrawTextureEx(level1_txt, pos_level1, 0, 1.0f, WHITE);
+    DrawTextureEx(level2_txt, pos_level2, 0, 1.0f, WHITE);
 
     // printf("%d\n", userProgression.lastPointsLevel1);
 
@@ -611,6 +610,35 @@ void DrawSelectGame(Texture2D txt_leve1, Texture2D txt_level2, Texture2D estrell
         }
     }
 
+    if (userProgression.lastPointsLevel2 >= maxPoints[1]) // dibujar 3 estrellas amarillas
+    {
+        DrawTexture(estrellas, 145 + screenWidth / 2, screenHeight / 1.48, WHITE);
+        DrawTexture(estrellas, 180 + screenWidth / 1.9, screenHeight / 1.48, WHITE);
+        DrawTexture(estrellas, 205 + screenWidth / 1.8, screenHeight / 1.48, WHITE);
+    }
+    else
+    {
+        if (userProgression.lastPointsLevel2 >= (maxPoints[1] / 2)) // dibujar 2 estrellas amarillas 1 vacia
+        {
+            DrawTexture(estrellas, 145 + screenWidth / 2, screenHeight / 1.48, WHITE);
+            DrawTexture(estrellas, 180 + screenWidth / 1.9, screenHeight / 1.48, WHITE);
+            DrawTexture(estrellas_vacias_1, 205 + screenWidth / 1.8, screenHeight / 1.469, WHITE);
+        }
+        else
+        {
+            if (userProgression.lastPointsLevel2 >= (maxPoints[1] / 3)) // dibujar 1 estrella amarilla y 2 vacias
+            {
+                DrawTexture(estrellas, 145 + screenWidth / 2, screenHeight / 1.48, WHITE);
+                DrawTexture(estrellas_vacias_1, 180 + screenWidth / 1.9, screenHeight / 1.469, WHITE);
+                DrawTexture(estrellas_vacias_1, 205 + screenWidth / 1.8, screenHeight / 1.469, WHITE);
+            }
+            else // dibujar 3 estrellas vacias
+            {
+                DrawTexture(estrellas_vacias, 115 + screenWidth / 2, screenHeight / 1.52, WHITE);
+            }
+        }
+    }
+
     /***********************************  Dibujar dinosaurio que escogio el usuario *******************************************/
     if (selectDino == 1)
     {
@@ -638,7 +666,7 @@ void DrawSelectGame(Texture2D txt_leve1, Texture2D txt_level2, Texture2D estrell
 }
 
 //******************************** NIVELES ******************************************
-int DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_WIDTH], Color preColors[], Texture2D fondo, Texture2D icono, Vector2 posicion, int frame, float runningTime, float frameTime, Texture2D bordes, int maxPoints[], int currentPoints)
+int DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_WIDTH], Color preColors[], Vector2 posicion, int frame, float runningTime, float frameTime, int maxPoints[], int currentPoints)
 {
     // Calculates position of the matrix on the screen
     if (!musicPaused)
@@ -680,7 +708,7 @@ int DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_W
     Color rectangleColor = {0, 0, 0, 140};
     Color rectangleColor2 = {0, 0, 0, 200};
     Vector2 pos = {375, 285};
-    DrawTextureEx(fondo, posicion, 0, 1.0f, WHITE);
+    DrawTextureEx(bg_level1_txt, posicion, 0, 1.0f, WHITE);
     DrawRectangleRounded(rec2, .30, .50, rectangleColor2);
     DrawRectangleRounded(rec, .35, .50, rectangleColor);
     DrawRectangleRounded(rec3, .10, .50, rectangleColor);
@@ -738,10 +766,13 @@ int DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_W
                     getMouseCollision.y = j;
                     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
                     {
+
                         if (!pressedButtonNo2Flag)
                         {
+                            playsound(sound1, soundPaused);
                             if (!pressedButtonNo1Flag)
                             {
+                                playsound(sound1, soundPaused);
                                 isMousePressedCollision[0].x = i;
                                 isMousePressedCollision[0].y = j;
                                 pressedButtonNo1Flag = 1;
@@ -805,7 +836,7 @@ int DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_W
         }
     }
 
-    if (pressedButtonNo1Flag)
+    if (pressedButtonNo1Flag && intentos != 0)
     {
         displayNumber.height = 150;
         displayNumber.width = 160;
@@ -843,7 +874,7 @@ int DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_W
         drawMatrixCollision(enlargedRect, gameMatrix, squareMatrixColor, preColors); // Check collision and display it (Do not modify unless you want modify how it looks like)
     }
 
-    if (pressedButtonNo2Flag)
+    if (pressedButtonNo2Flag && intentos != 0)
     {
         validate = ValidateMatrix(squareMatrixColor, (int)isMousePressedCollision[0].x, (int)isMousePressedCollision[0].y, (int)isMousePressedCollision[1].x, (int)isMousePressedCollision[1].y);
         if (validate != 0)
@@ -900,7 +931,7 @@ int DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_W
                         printf("It was correct!\n"); // If the user guessed right, we can display the message here, so you can draw whatever you want if he guessed right. (add animation if it's necessary)
                         guessedRight = true;
                         guessedRight2 = true;
-                        currentPoints += 500;
+                        currentPoints += 50 * intentos;
                     }
                     else
                     {
@@ -959,15 +990,16 @@ int DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_W
     pos_pnt.x = 660;
     pos_pnt.y = 815;
     DrawTextEx(fonT, number, pos_pnt, 55, 1, WHITE);
-    EndDrawing();
-
     if (intentos == 0)
     {
-        DrawText("Perdiste!", 500, 500, 200, WHITE); // Make an animation
+        PauseMusicStream(NIVEL1);
+        DrawGameOver();
     }
+    EndDrawing();
+
     if (guessedRight)
     {
-        animationChange(squareMatrixColor, gameMatrix, preColors, fondo, icono, posicion, frame, runningTime, frameTime, bordes, maxPoints, currentPoints);
+        animationChange(squareMatrixColor, gameMatrix, preColors, posicion, frame, runningTime, frameTime, maxPoints, currentPoints, 0);
         tempCorrectedGuess[0][0] = gameMatrix[(int)isMousePressedCollision[0].x][(int)isMousePressedCollision[0].y];
         gameMatrix[(int)isMousePressedCollision[0].x][(int)isMousePressedCollision[0].y] = gameMatrix[(int)isMousePressedCollision[1].x][(int)isMousePressedCollision[1].y];
         gameMatrix[(int)isMousePressedCollision[1].x][(int)isMousePressedCollision[1].y] = tempCorrectedGuess[0][0];
@@ -1004,7 +1036,369 @@ void UpdateGameLv1()
             playsound(sound1, soundPaused);
             currentGameLevel = OPTIONS2;
         }
+        if (CheckMouseOnOptionY("Salir", 70, 0.78))
+        {
+            playsound(sound1, soundPaused);
+            currentGameLevel = WAITING;
+            leaveGameFlag = true;
+        }
     }
+}
+
+int DrawGameLv2(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_WIDTH], Color preColors[], Vector2 posicion, int frame, float runningTime, float frameTime, int maxPoints[], int currentPoints)
+{
+    if (!musicPaused)
+    {
+        UpdateMusicStream(NIVEL1); // Modificar esto
+    }
+    int matrixX = 405 + (screenWidth - MATRIX_WIDTH * (RECTANGLE_SIZE + 10)) / 2;
+    int matrixY = 50 + (screenHeight - MATRIX_HEIGHT * (RECTANGLE_SIZE + 10)) / 2;
+
+    Rectangle rectangulo;
+    rectangulo.height = RECTANGLE_SIZE;
+    rectangulo.width = RECTANGLE_SIZE;
+
+    Rectangle number1 = {0};
+    Rectangle number2 = {0};
+    number1 = rectangulo;
+    number2 = rectangulo;
+
+    Rectangle displayNumber = {0};
+    int tempCorrectedGuess[2][2];
+
+    // Temp values variables. It calculates the position of the text depending on a rectangle.
+    float textX;
+    float textY;
+
+    // Saves user's input as an array so i can be displayed.
+    guessedRight = false;
+    Rectangle enlargedRect = {0}; // Temp rectangle to save where the rectangle did collision, so it can be displayed with an animation
+
+    BeginDrawing();
+    ClearBackground(BLACK);
+    /**** dibujar cosas necesarias para nivel  ***/
+    Rectangle rec = {63, 215, 762, 305};
+    Rectangle rec2 = {150, 552, 600, 150};
+    Rectangle rec3 = {860, 200, 1000, 780};
+    Rectangle rec_pnts = {595, 740, 240, 240};
+    Rectangle rec_int = {1520, 990, 330, 65};
+
+    Color rectangleColor = {0, 0, 0, 140};
+    Color rectangleColor2 = {0, 0, 0, 200};
+    Vector2 pos = {375, 285};
+    DrawTextureEx(bg_level1_txt, posicion, 0, 1.0f, WHITE);
+    DrawRectangleRounded(rec2, .30, .50, rectangleColor2);
+    DrawRectangleRounded(rec, .35, .50, rectangleColor);
+    DrawRectangleRounded(rec3, .10, .50, rectangleColor);
+    DrawTexture(borde, 0, 0, WHITE);
+    DrawTexture(bordes, 50, 200, WHITE);
+    DrawTexture(icono, screenWidth / 2, 30, WHITE); // FALTTA PONER LOGO DE SUMPY
+    DrawTextEx(fonT, "x", pos, 220, 0, WHITE);
+    Vector2 pos_nivel = {40, 40};
+    DrawTextEx(fonT, "Level 2", pos_nivel, 100, 0, WHITE);
+    DrawTexture(ajustes, 1800, 30, WHITE);
+    DrawRectangleRounded(rec_pnts, 0.30, 0.50, rectangleColor);
+    Vector2 po_objt = {600, 750};
+    DrawTextEx(fonT, "Objetivo", po_objt, 60, 0, WHITE);
+    Vector2 pos_pnt = {630, 865};
+    DrawTextEx(fonT, "Puntos", pos_pnt, 60, 0, WHITE);
+    Vector2 pos_intentos = {1530, 995};
+    DrawRectangleRounded(rec_int, 0.35, 0.50, rectangleColor);
+    DrawTextEx(fonT, "Intentos:", pos_intentos, 60, 0, WHITE);
+    // DrawCircle(1850, 80, 50, WHITE); // ciruclo de ajustes
+    if (selectDino == 1)
+    {
+        // dibujar a espy
+        generate_dinos(frame, runningTime, frameTime, dino1, screenWidth - 2000, screenHeight / 1.45, 24, 0);
+    }
+    else
+    {
+        if (selectDino == 2)
+        {
+            // dibujar a nacky
+            generate_dinos(frame, runningTime, frameTime, dino4, screenWidth - 2000, screenHeight / 1.45, 24, 0);
+        }
+        else
+        {
+            if (selectDino == 3)
+            {
+                // dibujar a juan
+                generate_dinos(frame, runningTime, frameTime, dino3, screenWidth - 2000, screenHeight / 1.45, 24, 0);
+            }
+        }
+    }
+
+    for (int i = 0; i < MATRIX_HEIGHT; i++)
+    {
+        for (int j = 0; j < MATRIX_WIDTH; j++)
+        {
+            rectangulo.x = matrixX + j * (RECTANGLE_SIZE + 10);
+            rectangulo.y = matrixY + i * (RECTANGLE_SIZE + 10);
+
+            if (!returnFlag)
+            {
+                if (CheckCollisionPointRec(GetMousePosition(), rectangulo))
+                {
+                    enlargedRect = rectangulo;
+                    getMouseCollision.x = i;
+                    getMouseCollision.y = j;
+                    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+                    {
+                        if (!pressedButtonNo2Flag)
+                        {
+                            playsound(sound1, soundPaused);
+                            if (!pressedButtonNo1Flag)
+                            {
+                                playsound(sound1, soundPaused);
+                                isMousePressedCollision[0].x = i;
+                                isMousePressedCollision[0].y = j;
+                                pressedButtonNo1Flag = 1;
+                                inputNumbers[0] = '\0';
+                            }
+                            else
+                            {
+                                if (isMousePressedCollision[0].x != i || isMousePressedCollision[0].y != j)
+                                {
+                                    if ((isMousePressedCollision[0].x == i && (isMousePressedCollision[0].y == j + 1 || isMousePressedCollision[0].y == j - 1)) ||
+                                        (isMousePressedCollision[0].y == j && (isMousePressedCollision[0].x == i + 1 || isMousePressedCollision[0].x == i - 1)))
+                                    {
+                                        if (squareMatrixColor[(int)isMousePressedCollision[0].x][(int)isMousePressedCollision[0].y] != squareMatrixColor[i][j])
+                                        {
+                                            isMousePressedCollision[1].x = i;
+                                            isMousePressedCollision[1].y = j;
+                                            pressedButtonNo2Flag = 1;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (isMousePressedCollision[0].x != -1.0f)
+                            {
+                                isMousePressedCollision[0].x = i;
+                                isMousePressedCollision[0].y = j;
+                                isMousePressedCollision[1].x = 0.0f;
+                                isMousePressedCollision[1].y = 0.0f;
+                                pressedButtonNo1Flag = 1;
+                                pressedButtonNo2Flag = 0;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    // Display squares with no animation
+                    snprintf(number, sizeof(number), "%d", gameMatrix[i][j]);
+                    textX = rectangulo.x + (RECTANGLE_SIZE - MeasureText(number, 50)) / 2;
+                    textY = rectangulo.y + (RECTANGLE_SIZE - 50) / 2;
+                    DrawRectangleRounded(rectangulo, 0.4, 0, preColors[squareMatrixColor[i][j]]);
+                    DrawRectangleRoundedLines(rectangulo, 0.4, 20, 2, WHITE);
+                    DrawText(number, textX, textY, 50, WHITE);
+                }
+            }
+
+            if (!guessedRight)
+            {
+                if (j < MATRIX_WIDTH - 2 && squareMatrixColor[i][j] == squareMatrixColor[i][j + 1] && squareMatrixColor[i][j + 1] == squareMatrixColor[i][j + 2])
+                {
+                    squareMatrixColor[i][j + 2] = getRandomNumber(0, 2);
+                }
+
+                if (i < MATRIX_HEIGHT - 2 && squareMatrixColor[i][j] == squareMatrixColor[i + 1][j] && squareMatrixColor[i + 1][j] == squareMatrixColor[i + 2][j])
+                {
+                    squareMatrixColor[i + 2][j] = getRandomNumber(0, 2);
+                }
+            }
+        }
+    }
+
+    if (pressedButtonNo1Flag && intentos != 0)
+    {
+        displayNumber.height = 150;
+        displayNumber.width = 160;
+        displayNumber.x = 195;
+        displayNumber.y = 310;
+        // In this part of the code, it displays the number on screen (left size)
+        //  and also it animates when it's selected (the number)
+        snprintf(number, sizeof(number), "%d", gameMatrix[(int)isMousePressedCollision[0].x][(int)isMousePressedCollision[0].y]);
+
+        textX = displayNumber.x + (displayNumber.width - MeasureText(number, displayNumber.height)) / 2;
+        textY = displayNumber.y;
+        Vector2 pos1 = {textX, textY};
+        DrawTextEx(fonT, number, pos1, 150, 0, WHITE);
+        drawMatrixSelected(number1, gameMatrix, matrixX, matrixY, (int)isMousePressedCollision[0].x, (int)isMousePressedCollision[0].y, number, preColors, squareMatrixColor[(int)isMousePressedCollision[0].x][(int)isMousePressedCollision[0].y]);
+
+        if (pressedButtonNo2Flag)
+        {
+            // In this part of the code, it displays the number on screen (left size)
+            //  and also it animates when it's selected (the number)
+            displayNumber.x = 500;
+            displayNumber.y = 310;
+
+            snprintf(number, sizeof(number), "%d", gameMatrix[(int)isMousePressedCollision[1].x][(int)isMousePressedCollision[1].y]);
+            textX = displayNumber.x + (displayNumber.width - MeasureText(number, displayNumber.height)) / 2;
+            textY = displayNumber.y;
+            Vector2 pos2 = {textX, textY};
+
+            DrawTextEx(fonT, number, pos2, 150, 0, WHITE);
+            drawMatrixSelected(number2, gameMatrix, matrixX, matrixY, (int)isMousePressedCollision[1].x, (int)isMousePressedCollision[1].y, number, preColors, squareMatrixColor[(int)isMousePressedCollision[1].x][(int)isMousePressedCollision[1].y]);
+        }
+    }
+
+    if (enlargedRect.width > 0)
+    {
+        drawMatrixCollision(enlargedRect, gameMatrix, squareMatrixColor, preColors); // Check collision and display it (Do not modify unless you want modify how it looks like)
+    }
+
+    if (pressedButtonNo2Flag && intentos != 0)
+    {
+        validate = ValidateMatrix(squareMatrixColor, (int)isMousePressedCollision[0].x, (int)isMousePressedCollision[0].y, (int)isMousePressedCollision[1].x, (int)isMousePressedCollision[1].y);
+        if (validate != 0)
+        {
+            int key = GetKeyPressed();
+            if (key >= 48 && key <= 57)
+            {
+                if (inputLengthNumbers < 2)
+                {
+                    inputNumbers[inputLengthNumbers] = (char)key;
+                    inputLengthNumbers++;
+                    inputNumbers[inputLengthNumbers] = '\0';
+                }
+            }
+
+            if (IsKeyPressed(KEY_BACKSPACE))
+            {
+                if (inputLengthNumbers > 0)
+                {
+                    inputLengthNumbers--;
+                    inputNumbers[inputLengthNumbers] = '\0';
+                }
+            }
+            if (inputLengthNumbers == 0)
+            {
+                // Draw text "Ingresa la respuesta"
+                Vector2 pos2 = {215, 600};
+                DrawTextEx(fonT, "Ingresa la respuesta", pos2, 50, 0, WHITE);
+            }
+
+            if (IsKeyPressed(KEY_ENTER))
+            {
+                mostrar_mnsj = true;
+                if (inputLengthNumbers > 0)
+                {
+                    bool resultFlag;
+                    int userInput = atoi(inputNumbers);
+                    resultFlag = verificar_multi(gameMatrix, isMousePressedCollision, userInput);
+
+                    if (resultFlag)
+                    {
+
+                        pressedButtonNo1Flag = 0;
+                        pressedButtonNo2Flag = 0;
+
+                        tempCorrectedGuess[0][0] = gameMatrix[(int)isMousePressedCollision[0].x][(int)isMousePressedCollision[0].y];
+                        gameMatrix[(int)isMousePressedCollision[0].x][(int)isMousePressedCollision[0].y] = gameMatrix[(int)isMousePressedCollision[1].x][(int)isMousePressedCollision[1].y];
+                        gameMatrix[(int)isMousePressedCollision[1].x][(int)isMousePressedCollision[1].y] = tempCorrectedGuess[0][0];
+
+                        tempCorrectedGuess[0][0] = squareMatrixColor[(int)isMousePressedCollision[0].x][(int)isMousePressedCollision[0].y];
+                        squareMatrixColor[(int)isMousePressedCollision[0].x][(int)isMousePressedCollision[0].y] = squareMatrixColor[(int)isMousePressedCollision[1].x][(int)isMousePressedCollision[1].y];
+                        squareMatrixColor[(int)isMousePressedCollision[1].x][(int)isMousePressedCollision[1].y] = tempCorrectedGuess[0][0];
+
+                        printf("It was correct!\n"); // If the user guessed right, we can display the message here, so you can draw whatever you want if he guessed right. (add animation if it's necessary)
+                        guessedRight = true;
+                        guessedRight2 = true;
+                        currentPoints += 50 * intentos;
+                    }
+                    else
+                    {
+                        // In this part, we will display a message saying it wasn't correct.
+                        guessedRight2 = false;
+                        intentos--;
+                        printf("It wasn't correct!\n");
+                    }
+                    inputLengthNumbers = 0;
+                    inputNumbers[0] = '\0';
+                }
+            }
+            else
+            {
+                Vector2 pos3 = {390, 560};
+                DrawTextEx(fonT, inputNumbers, pos3, 155, 0, YELLOW);
+                // DrawText(inputNumbers, 520, 580, 150, BLACK); // Display numbers on screen. You can modify this for a different font.
+            }
+        }
+    }
+
+    if (selectDino != 0)
+    {
+        if (guessedRight2)
+        {
+            DrawTexture(mnsj_correcto, 200, 650, WHITE);
+        }
+        else
+        {
+            if (mostrar_mnsj)
+            {
+                DrawTexture(mnsj_incorrecto, 200, 650, WHITE);
+            }
+        }
+    }
+
+    // Dibujando puntaje y puntaje maximo
+    itoa(intentos, number, 10);
+    pos_intentos.y = 1000;
+    pos_intentos.x = 1765;
+    DrawTextEx(fonT, number, pos_intentos, 55, 0, WHITE);
+    itoa(currentPoints, number, 10);
+    if (currentPoints < 1000)
+    {
+        pos_pnt.y = 920;
+        pos_pnt.x = 680;
+        DrawTextEx(fonT, number, pos_pnt, 55, 0, WHITE);
+    }
+    else
+    {
+        pos_pnt.y = 920;
+        pos_pnt.x = 650;
+        DrawTextEx(fonT, number, pos_pnt, 55, 0, WHITE);
+    }
+    itoa(maxPoints[1], number, 10);
+    pos_pnt.x = 660;
+    pos_pnt.y = 815;
+    DrawTextEx(fonT, number, pos_pnt, 55, 1, WHITE);
+    if (intentos == 0)
+    {
+        DrawGameOver(); // Agregar musica y pausar aquí.
+    }
+    EndDrawing();
+
+    if (guessedRight)
+    {
+        animationChange(squareMatrixColor, gameMatrix, preColors, posicion, frame, runningTime, frameTime, maxPoints, currentPoints, 1);
+        tempCorrectedGuess[0][0] = gameMatrix[(int)isMousePressedCollision[0].x][(int)isMousePressedCollision[0].y];
+        gameMatrix[(int)isMousePressedCollision[0].x][(int)isMousePressedCollision[0].y] = gameMatrix[(int)isMousePressedCollision[1].x][(int)isMousePressedCollision[1].y];
+        gameMatrix[(int)isMousePressedCollision[1].x][(int)isMousePressedCollision[1].y] = tempCorrectedGuess[0][0];
+
+        tempCorrectedGuess[0][0] = squareMatrixColor[(int)isMousePressedCollision[0].x][(int)isMousePressedCollision[0].y];
+        squareMatrixColor[(int)isMousePressedCollision[0].x][(int)isMousePressedCollision[0].y] = squareMatrixColor[(int)isMousePressedCollision[1].x][(int)isMousePressedCollision[1].y];
+        squareMatrixColor[(int)isMousePressedCollision[1].x][(int)isMousePressedCollision[1].y] = tempCorrectedGuess[0][0];
+        modifyMatrix(gameMatrix, preColors, validate, squareMatrixColor, (int)isMousePressedCollision[0].x, (int)isMousePressedCollision[0].y, (int)isMousePressedCollision[1].x, (int)isMousePressedCollision[1].y);
+    }
+    returnFlag = false;
+    return currentPoints;
+}
+
+bool verificar_multi(int gameMatrix[][MATRIX_WIDTH], Vector2 position[], int userInput)
+{
+    int gameNumberSum;
+    gameNumberSum = gameMatrix[(int)position[0].x][(int)position[0].y] * gameMatrix[(int)position[1].x][(int)position[1].y];
+
+    if (gameNumberSum == userInput)
+    {
+        return true;
+    }
+    return false;
 }
 
 void DrawOptionsLevel(int frame, float runningTime, float frameTime)
@@ -1045,7 +1439,7 @@ void DrawOptionsLevel(int frame, float runningTime, float frameTime)
         DrawText("ON", screenWidth / 1.6 - MeasureText("Musica", 70) / 2, screenHeight * 0.595, 60, colo1);
     }
     texto_sencillo("Regresar", 0.70, 70, 2, 0.660, true);
-    texto_sencillo("Salir del juego", 0.78, 70, 2, 0.755, true);
+    texto_sencillo("Abandonar nivel", 0.78, 70, 2, 0.755, true);
     // texto_sencillo("Salir", 0.78, 70, 2, 0.800, true);
 
     EndDrawing();
@@ -1054,7 +1448,7 @@ void UpdateOptionLevel1()
 {
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
     {
-        if (CheckMouseOnOptionY("Salir del juego", 70, 0.78))
+        if (CheckMouseOnOptionY("Abandonar nivel", 70, 0.78))
         {
             playsound(sound1, soundPaused);
             currentGameLevel = WAITING;
@@ -1067,6 +1461,7 @@ void UpdateOptionLevel1()
             pressedButtonNo2Flag = false;
             isMousePressedCollision[0].x = -1.0f;
             leaveGameFlag = true;
+            intentos = 3;
         }
         if (CheckMouseOnOptionY("Regresar", 70, 0.70))
         {
@@ -1107,6 +1502,85 @@ void UpdateOptionLevel1()
     }
 }
 
+void DrawGameOver(void)
+{
+    Color color1 = {234, 255, 166, 255};
+    Color rectangleColor = {0, 0, 0, 140};
+    DrawRectangle(0, 0, 1920, 1080, rectangleColor);
+
+    Rectangle rec = {200, 180, 1500, 800};
+    Color color_rec = {21, 53, 13, 255};
+    Color color_bordes = {12, 29, 7, 255};
+    DrawRectangleRounded(rec, 0.35, 0.50, color_rec);
+    DrawRectangleRoundedLines(rec, 0.35, 0.50, 20, color_bordes);
+    DrawTexture(perdiste, screenWidth / 3.5, 200, WHITE);
+    Vector2 pos = {screenWidth / 3.5, screenHeight / 2};
+    Vector2 pos2 = {screenWidth / 2.6, screenHeight / 1.8};
+    DrawTextEx(fonT, "Te has quedado sin intentos", pos, 70, 0, color1);
+    DrawTextEx(fonT, "Juega de nuevo!", pos2, 70, 0, color1);
+    Rectangle rec_mini = {screenWidth / 2.35, screenHeight / 1.3, 300, 70};
+    DrawRectangleRounded(rec_mini, 0.35, 0.50, rectangleColor);
+    DrawRectangleRoundedLines(rec_mini, 0.35, 0.50, 10, color_bordes);
+    texto_sencillo("Salir", 0.78, 70, 2, 1.3, 0);
+}
+
+void UpdateOptionLevel2()
+{
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+    {
+        if (CheckMouseOnOptionY("Salir del juego", 70, 0.78))
+        {
+            playsound(sound1, soundPaused);
+            currentGameLevel = WAITING;
+            inputLengthNumbers = 0;
+            inputNumbers[0] = '\0';
+            mostrar_mnsj = false;
+            guessedRight = false;
+            guessedRight2 = false;
+            pressedButtonNo1Flag = false;
+            pressedButtonNo2Flag = false;
+            isMousePressedCollision[0].x = -1.0f;
+            leaveGameFlag = true;
+            intentos = 3;
+        }
+        if (CheckMouseOnOptionY("Regresar", 70, 0.70))
+        {
+            playsound(sound1, soundPaused);
+            returnFlag = true;
+            currentGameLevel = LEVEL2;
+        }
+        if (CheckMouseOnOptionY("Musica", 70, 0.620))
+        {
+            playsound(sound1, soundPaused);
+            if (musicPaused)
+            {
+                ResumeMusicStream(level1);
+                ResumeMusicStream(music);
+                musicPaused = false;
+            }
+            else
+            {
+                PauseMusicStream(level1);
+                PauseMusicStream(music);
+                musicPaused = true;
+            }
+        }
+        if (CheckMouseOnOptionY("Efectos", 70, 0.532))
+        {
+            if (soundPaused)
+            {
+                ResumeSound(sound1);
+                soundPaused = false;
+            }
+            else
+            {
+                PauseSound(sound1);
+                soundPaused = true;
+                playsound(sound1, soundPaused);
+            }
+        }
+    }
+}
 //******************************   DINOSAURIOS   *************************************
 void DrawCustome(int frame, float runningTime, float frameTime)
 {
@@ -1603,7 +2077,7 @@ double easeInOutCirc(double x)
     return 0.5 * (1 - cos(x * 3.1416));
 }
 
-void animationChange(int squareMatrixColor[][MATRIX_WIDTH], int gameMatrix[][MATRIX_WIDTH], Color preColors[], Texture2D fondo, Texture2D icono, Vector2 posicion, int frame, float runningTime, float frameTime, Texture2D bordes, int maxPoints[], int currentPoints)
+void animationChange(int squareMatrixColor[][MATRIX_WIDTH], int gameMatrix[][MATRIX_WIDTH], Color preColors[], Vector2 posicion, int frame, float runningTime, float frameTime, int maxPoints[], int currentPoints, int maxPointsIndex)
 {
     int frames = 0;
     const int animationDuration = 80;
@@ -1652,7 +2126,7 @@ void animationChange(int squareMatrixColor[][MATRIX_WIDTH], int gameMatrix[][MAT
         Vector2 po_objt = {600, 750};
         Vector2 pos_pnt = {630, 865};
         Vector2 pos_intentos = {1530, 995};
-        DrawTextureEx(fondo, posicion, 0, 1.0f, WHITE);
+        DrawTextureEx(bg_level1_txt, posicion, 0, 1.0f, WHITE);
         if (selectDino == 1)
         {
             // dibujar a espy
@@ -1680,9 +2154,26 @@ void animationChange(int squareMatrixColor[][MATRIX_WIDTH], int gameMatrix[][MAT
         DrawTexture(borde, 0, 0, WHITE);
         DrawTexture(bordes, 50, 200, WHITE);
         DrawTexture(icono, screenWidth / 2, 30, WHITE); // FALTTA PONER LOGO DE SUMPY
-        DrawTextEx(fonT, "+", pos, 220, 0, WHITE);
-        DrawTextEx(fonT, "Level 1", pos_nivel, 100, 0, WHITE);
+
         DrawTexture(ajustes, 1800, 30, WHITE);
+        if (maxPointsIndex)
+        {
+            DrawTextEx(fonT, "Level 2", pos_nivel, 100, 0, WHITE);
+            DrawTextEx(fonT, "x", pos, 220, 0, WHITE);
+            if (!musicPaused)
+            {
+                UpdateMusicStream(NIVEL1);
+            }
+        }
+        else
+        {
+            DrawTextEx(fonT, "Level 1", pos_nivel, 100, 0, WHITE);
+            DrawTextEx(fonT, "+", pos, 220, 0, WHITE);
+            if (!musicPaused)
+            {
+                // UpdateMusicStream(NIVEL1); <---- Nivel 2
+            }
+        }
         DrawRectangleRounded(rec_pnts, 0.30, 0.50, rectangleColor);
         DrawTextEx(fonT, "Objetivo", po_objt, 60, 0, WHITE);
         DrawTextEx(fonT, "Puntos", pos_pnt, 60, 0, WHITE);
@@ -1746,7 +2237,7 @@ void animationChange(int squareMatrixColor[][MATRIX_WIDTH], int gameMatrix[][MAT
             pos_pnt.x = 650;
             DrawTextEx(fonT, number, pos_pnt, 50, 0, WHITE);
         }
-        itoa(maxPoints[0], number, 10);
+        itoa(maxPoints[maxPointsIndex], number, 10);
         pos_pnt.x = 660;
         pos_pnt.y = 815;
         DrawTextEx(fonT, number, pos_pnt, 50, 1, WHITE);
@@ -1801,6 +2292,36 @@ void cargar_texturas(void)
     dino2 = LoadTexture("imagenes_danna\\sheets\\DinoSprites - vita.png");
     dino3 = LoadTexture("imagenes_danna\\sheets\\DinoSprites - mort.png");
     dino4 = LoadTexture("imagenes_danna\\sheets\\DinoSprites - tard.png");
+}
+
+void cargar_texturas_main2(void)
+{
+    /************************ Background SELECTGAME ******************************/
+    background_selectgame = LoadImage("imagenes_danna\\background_selectgame.png");
+    ImageResize(&background_selectgame, screenWidth, screenHeight);
+    selectgame_txt = LoadTextureFromImage(background_selectgame);
+    UnloadImage(background_selectgame);
+    /****************************** Background NIVEL 1 *****************************/
+    bg_level1 = LoadImage("imagenes_danna\\background_level1.png");
+    ImageResize(&bg_level1, screenWidth, screenHeight);
+    bg_level1_txt = LoadTextureFromImage(bg_level1);
+    UnloadImage(bg_level1);
+    /*********************************** Texturas niveles **************************************/
+    bordes = LoadTexture("imagenes_danna\\diseno_numeros.png");
+    icono = LoadTexture("imagenes_danna\\logoS.png");
+    mnsj_correcto = LoadTexture("imagenes_danna\\mnsj_correcto_dino.png");
+    mnsj_incorrecto = LoadTexture("imagenes_danna\\mnsj_incorrecto.png");
+    borde = LoadTexture("imagenes_danna\\borde.png");
+    ajustes = LoadTexture("imagenes_danna\\ajustes.png");
+    /***************************  Imagenes de niveles *******************************/
+    level1_txt = LoadTexture("imagenes_danna\\selectLevel1-removebg-preview.png");
+    level2_txt = LoadTexture("imagenes_danna\\selectLevel2-removebg-preview.png");
+    estrellas_vacias = LoadTexture("imagenes_danna\\estrellas_vacias.png");
+    estrellas_vacias_1 = LoadTexture("imagenes_danna\\estrella_vacia_1.png");
+    estrellas = LoadTexture("imagenes_danna\\estrella.png");
+    perdiste = LoadTexture("imagenes_danna\\perdiste.png");
+    /******* textura selecciona un nivel*******/
+    selecNivel = LoadTexture("imagenes_danna\\SELECCIONA_UN_NIVEL.png");
 }
 
 int getRandomNumber(int ri, int rf)
