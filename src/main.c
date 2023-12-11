@@ -60,6 +60,7 @@ Texture2D mnsj_correcto;
 Texture2D mnsj_incorrecto;
 Texture2D borde;
 Texture2D ajustes;
+Texture2D estrellas_vacias_1;
 bool waiting = true;
 int selectDino = 0;
 const int screenWidth = 1920;
@@ -79,7 +80,7 @@ Vector2 isMousePressedCollision[2] = {0};
 bool guessedRight = false;
 bool guessedRight2 = false;
 int validate = 0;
-char number[4];
+char number[10];
 char inputNumbers[11];
 int inputLengthNumbers = 0;
 int intentos = 20;
@@ -443,7 +444,8 @@ void MainSelectGame()
     Texture2D level1_txt = LoadTexture("imagenes_danna\\selectLevel1-removebg-preview.png");
     Texture2D level2_txt = LoadTexture("imagenes_danna\\selectLevel2-removebg-preview.png");
     Texture2D estrellas_vacias = LoadTexture("imagenes_danna\\estrellas_vacias.png");
-    Texture2D estrellas = LoadTexture("imagenes_danna\\estrellas.png");
+    estrellas_vacias_1 = LoadTexture("imagenes_danna\\estrella_vacia_1.png");
+    Texture2D estrellas = LoadTexture("imagenes_danna\\estrella.png");
     Vector2 postionTexture = {(float)screenWidth / 2 - (float)screenWidth / 2, (float)screenHeight / 2 - (float)screenHeight / 2};
     /******* textura selecciona un nivel*******/
     Texture2D selecNivel = LoadTexture("imagenes_danna\\SELECCIONA_UN_NIVEL.png");
@@ -474,9 +476,9 @@ void MainSelectGame()
         }
     }
 
-    Color preColors[3] = {GREEN, RED, VIOLET};
-    int maxPoints[] = {100, 4500};
-    TSaveProgress userProgression = LoadProgressFile();
+    Color preColors[3] = {GREEN, ORANGE, RED};
+    int maxPoints[] = {2500, 4500};
+    TSaveProgress userProgression;
     TSaveProgress currentUserProgression = {0};
     currentUserProgression.lastPointsLevel1 = 0;
     currentUserProgression.lastPointsLevel2 = 0;
@@ -498,6 +500,7 @@ void MainSelectGame()
         switch (currentGameLevel)
         {
         case WAITING:
+            userProgression = LoadProgressFile();
             UpdateSelectGame();
             DrawTextureEx(selectgame_txt, postionTexture, 0, 1.0f, WHITE); // fondo
             DrawTexture(selecNivel, 250, 150, WHITE);                      // imagen selecciona un nivel
@@ -532,7 +535,7 @@ void MainSelectGame()
             pressedButtonNo1Flag = false;
             pressedButtonNo2Flag = false;
         }
-
+        SaveProgressFile(currentUserProgression);
     } while (!WindowShouldClose() && !salir);
     UnloadTexture(ajustes);
     UnloadTexture(borde);
@@ -547,7 +550,6 @@ void MainSelectGame()
     UnloadTexture(level2_txt);
     UnloadTexture(selecNivel);
     UnloadTexture(selectgame_txt);
-    SaveProgressFile(currentUserProgression);
 }
 
 void DrawSelectGame(Texture2D txt_leve1, Texture2D txt_level2, Texture2D estrellas_vacias, Texture2D estrellas, int frame, float runningTime, float frameTime, TSaveProgress userProgression, int maxPoints[])
@@ -571,14 +573,37 @@ void DrawSelectGame(Texture2D txt_leve1, Texture2D txt_level2, Texture2D estrell
     DrawRectangleRounded(rec, .30, .50, rectangleColor);
 
     DrawTextureEx(txt_leve1, pos_level1, 0, 1.0f, WHITE);
-    DrawTexture(estrellas, screenWidth / 1.79, screenHeight / 1.52, WHITE);
     DrawTextureEx(txt_level2, pos_level2, 0, 1.0f, WHITE);
 
-    //printf("%d\n", userProgression.lastPointsLevel1);
+    // printf("%d\n", userProgression.lastPointsLevel1);
 
-    if (userProgression.lastPointsLevel1 > maxPoints[0])
+    if (userProgression.lastPointsLevel1 >= maxPoints[0]) // dibujar 3 estrellas amarillas
     {
-        DrawTexture(estrellas_vacias, screenWidth / 3.5, screenHeight / 1.52, WHITE); // hacer un if de que si no ha jugado no hay estrellas y si si se dibujan las pintadas
+        DrawTexture(estrellas, screenWidth / 3.25, screenHeight / 1.48, WHITE);
+        DrawTexture(estrellas, screenWidth / 2.85, screenHeight / 1.48, WHITE);
+        DrawTexture(estrellas, screenWidth / 2.55, screenHeight / 1.48, WHITE);
+    }
+    else
+    {
+        if (userProgression.lastPointsLevel1 >= (maxPoints[0] / 2)) // dibujar 2 estrellas amarillas 1 vacia
+        {
+            DrawTexture(estrellas, screenWidth / 3.25, screenHeight / 1.48, WHITE);
+            DrawTexture(estrellas, screenWidth / 2.85, screenHeight / 1.48, WHITE);
+            DrawTexture(estrellas_vacias_1, screenWidth / 2.55, screenHeight / 1.469, WHITE);
+        }
+        else
+        {
+            if (userProgression.lastPointsLevel1 >= (maxPoints[0] / 3)) // dibujar 1 estrella amarilla y 2 vacias
+            {
+                DrawTexture(estrellas, screenWidth / 3.25, screenHeight / 1.48, WHITE);
+                DrawTexture(estrellas_vacias_1, screenWidth / 2.85, screenHeight / 1.469, WHITE);
+                DrawTexture(estrellas_vacias_1, screenWidth / 2.55, screenHeight / 1.469, WHITE);
+            }
+            else // dibujar 3 estrellas vacias
+            {
+                DrawTexture(estrellas_vacias, screenWidth / 3.5, screenHeight / 1.52, WHITE);
+            }
+        }
     }
 
     /***********************************  Dibujar dinosaurio que escogio el usuario *******************************************/
@@ -656,7 +681,7 @@ int DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_W
     DrawRectangleRounded(rec3, .10, .50, rectangleColor);
     DrawTexture(borde, 0, 0, WHITE);
     DrawTexture(bordes, 50, 200, WHITE);
-    DrawTexture(icono, screenWidth/2, 30, WHITE); // FALTTA PONER LOGO DE SUMPY
+    DrawTexture(icono, screenWidth / 2, 30, WHITE); // FALTTA PONER LOGO DE SUMPY
     DrawTextEx(fonT, "+", pos, 220, 0, WHITE);
     Vector2 pos_nivel = {40, 40};
     DrawTextEx(fonT, "Level 1", pos_nivel, 100, 0, WHITE);
@@ -664,7 +689,7 @@ int DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_W
     DrawRectangleRounded(rec_pnts, 0.30, 0.50, rectangleColor);
     Vector2 po_objt = {600, 750};
     DrawTextEx(fonT, "Objetivo", po_objt, 60, 0, WHITE);
-    Vector2 pos_pnt = {600, 865};
+    Vector2 pos_pnt = {630, 865};
     DrawTextEx(fonT, "Puntos", pos_pnt, 60, 0, WHITE);
     Vector2 pos_intentos = {1530, 995};
     DrawRectangleRounded(rec_int, 0.35, 0.50, rectangleColor);
@@ -892,23 +917,48 @@ int DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_W
         }
     }
 
-    if (guessedRight2)
+    if (selectDino != 0)
     {
-        DrawTexture(mnsj_correcto, 200, 650, WHITE);
+        if (guessedRight2)
+        {
+            DrawTexture(mnsj_correcto, 200, 650, WHITE);
+        }
+        else
+        {
+            if (mostrar_mnsj)
+            {
+                DrawTexture(mnsj_incorrecto, 200, 650, WHITE);
+            }
+        }
+    }
+
+    // Dibujando puntaje y puntaje maximo
+    itoa(intentos, number, 10);
+    pos_intentos.y = 1000;
+    pos_intentos.x = 1765;
+    DrawTextEx(fonT, number, pos_intentos, 55, 0, WHITE);
+    itoa(currentPoints, number, 10);
+    if (currentPoints < 1000)
+    {
+        pos_pnt.y = 920;
+        pos_pnt.x = 680;
+        DrawTextEx(fonT, number, pos_pnt, 55, 0, WHITE);
     }
     else
     {
-        if (mostrar_mnsj)
-        {
-            DrawTexture(mnsj_incorrecto, 200, 650, WHITE);
-        }
+        pos_pnt.y = 920;
+        pos_pnt.x = 650;
+        DrawTextEx(fonT, number, pos_pnt, 55, 0, WHITE);
     }
-    itoa(intentos, number, 10);
+    itoa(maxPoints[0], number, 10);
+    pos_pnt.x = 660;
+    pos_pnt.y = 815;
+    DrawTextEx(fonT, number, pos_pnt, 55, 1, WHITE);
     EndDrawing();
 
     if (intentos == 0)
     {
-        DrawText("Perdiste!", 500, 500, 200, WHITE);
+        DrawText("Perdiste!", 500, 500, 200, WHITE); // Make an animation
     }
     if (guessedRight)
     {
@@ -925,6 +975,7 @@ int DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_W
     returnFlag = false;
     return currentPoints;
 }
+
 bool verificar_suma(int gameMatrix[][MATRIX_WIDTH], Vector2 position[], int userInput)
 {
     int gameNumberSum;
@@ -1577,51 +1628,60 @@ void animationChange(int squareMatrixColor[][MATRIX_WIDTH], int gameMatrix[][MAT
     Rectangle rec = {63, 215, 762, 305};
     Rectangle rec2 = {150, 552, 600, 150};
     Rectangle rec3 = {860, 200, 1000, 780};
-    Color rectangleColor = {0, 0, 0, 140};
+    Rectangle rec_pnts = {595, 740, 240, 240};
+    Rectangle rec_int = {1520, 990, 330, 65};
+
     Vector2 pos = {375, 285};
-    if (selectDino == 1)
-    {
-        // dibujar a espy
-        generate_dinos(frame, runningTime, frameTime, dino1, screenWidth - 2000, screenHeight / 1.45, 24, 0);
-    }
-    else
-    {
-        if (selectDino == 2)
-        {
-            // dibujar a nacky
-            generate_dinos(frame, runningTime, frameTime, dino4, screenWidth - 2000, screenHeight / 1.45, 24, 0);
-        }
-        else
-        {
-            if (selectDino == 3)
-            {
-                // dibujar a juan
-                generate_dinos(frame, runningTime, frameTime, dino3, screenWidth - 2000, screenHeight / 1.45, 24, 0);
-            }
-        }
-    }
+    Vector2 pos_nivel = {40, 40};
+
+    Color rectangleColor = {0, 0, 0, 140};
+    Color rectangleColor2 = {0, 0, 0, 200};
+
     BeginDrawing();
 
     do
     {
+
         frames++;
+        Vector2 po_objt = {600, 750};
+        Vector2 pos_pnt = {630, 865};
+        Vector2 pos_intentos = {1530, 995};
         DrawTextureEx(fondo, posicion, 0, 1.0f, WHITE);
-        DrawRectangleRounded(rec2, .30, .50, rectangleColor);
+        if (selectDino == 1)
+        {
+            // dibujar a espy
+            generate_dinos(frame, runningTime, frameTime, dino1, screenWidth - 2000, screenHeight / 1.45, 24, 0);
+        }
+        else
+        {
+            if (selectDino == 2)
+            {
+                // dibujar a nacky
+                generate_dinos(frame, runningTime, frameTime, dino4, screenWidth - 2000, screenHeight / 1.45, 24, 0);
+            }
+            else
+            {
+                if (selectDino == 3)
+                {
+                    // dibujar a juan
+                    generate_dinos(frame, runningTime, frameTime, dino3, screenWidth - 2000, screenHeight / 1.45, 24, 0);
+                }
+            }
+        }
+        DrawRectangleRounded(rec2, .30, .50, rectangleColor2);
         DrawRectangleRounded(rec, .35, .50, rectangleColor);
         DrawRectangleRounded(rec3, .10, .50, rectangleColor);
         DrawTexture(borde, 0, 0, WHITE);
-        // DrawRectangle(0, screenHeight * 0.0001, 1920, 140, BLACK);
         DrawTexture(bordes, 50, 200, WHITE);
-        // DrawTexture(icono, screenHeight * 0.0001, screenHeight / 2, WHITE); // modificar eso
+        DrawTexture(icono, screenWidth / 2, 30, WHITE); // FALTTA PONER LOGO DE SUMPY
         DrawTextEx(fonT, "+", pos, 220, 0, WHITE);
-        Vector2 pos_nivel = {40, 20};
         DrawTextEx(fonT, "Level 1", pos_nivel, 100, 0, WHITE);
         DrawTexture(ajustes, 1800, 30, WHITE);
-        // DrawCircle(1850, 80, 50, WHITE); // ciruclo de ajustes
-        rectangulo2.width = animation2(startRect.width, endRect.width, frames / (float)animationDuration);
-        rectangulo2.height = animation2(startRect.height, endRect.height, frames / (float)animationDuration);
-        rectangulo2.x = animation2(startRect.x, endRect.x, frames / (float)animationDuration);
-        rectangulo2.y = animation2(startRect.y, endRect.y, frames / (float)animationDuration);
+        DrawRectangleRounded(rec_pnts, 0.30, 0.50, rectangleColor);
+        DrawTextEx(fonT, "Objetivo", po_objt, 60, 0, WHITE);
+        DrawTextEx(fonT, "Puntos", pos_pnt, 60, 0, WHITE);
+        DrawRectangleRounded(rec_int, 0.35, 0.50, rectangleColor);
+        DrawTextEx(fonT, "Intentos:", pos_intentos, 60, 0, WHITE);
 
         for (int i = 0; i < MATRIX_HEIGHT; i++)
         {
@@ -1658,7 +1718,33 @@ void animationChange(int squareMatrixColor[][MATRIX_WIDTH], int gameMatrix[][MAT
         textX = rectangulo2.x + (RECTANGLE_SIZE - MeasureText(number, 50)) / 2;
         textY = rectangulo2.y + (RECTANGLE_SIZE - 50) / 2;
         DrawText(number, textX, textY, 50, WHITE);
-        DrawTexture(mnsj_correcto, 200, 650, WHITE);
+        if (selectDino != 0)
+        {
+            DrawTexture(mnsj_correcto, 200, 650, WHITE);
+        }
+
+        itoa(intentos, number, 10);
+        pos_intentos.y = 1000;
+        pos_intentos.x = 1765;
+        DrawTextEx(fonT, number, pos_intentos, 55, 0, WHITE);
+        itoa(currentPoints, number, 10);
+        if (currentPoints < 1000)
+        {
+            pos_pnt.y = 920;
+            pos_pnt.x = 680;
+            DrawTextEx(fonT, number, pos_pnt, 50, 0, WHITE);
+        }
+        else
+        {
+            pos_pnt.y = 920;
+            pos_pnt.x = 650;
+            DrawTextEx(fonT, number, pos_pnt, 50, 0, WHITE);
+        }
+        itoa(maxPoints[0], number, 10);
+        pos_pnt.x = 660;
+        pos_pnt.y = 815;
+        DrawTextEx(fonT, number, pos_pnt, 50, 1, WHITE);
+
         EndDrawing();
     } while (!WindowShouldClose() && frames < animationDuration);
 }
