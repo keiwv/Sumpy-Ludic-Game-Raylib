@@ -189,8 +189,6 @@ int main()
     SetWindowIcon(icon);
     PlayMusicStream(music);
     PlayMusicStream(level1);
-    PlayMusicStream(gameover);
-    PlayMusicStream(win);
     PlayMusicStream(NIVEL1);
     PlayMusicStream(NIVEL2);
     /****************************  Movimiento dinosaurio ****************************/
@@ -495,7 +493,7 @@ void MainSelectGame()
     }
 
     Color preColors[3] = {GREEN, ORANGE, RED};
-    int maxPoints[] = {100, 100};
+    int maxPoints[] = {200, 200};
     TSaveProgress userProgression = LoadProgressFile();
     TSaveProgress currentUserProgression = {0};
     currentUserProgression.lastPointsLevel1 = 0;
@@ -517,6 +515,10 @@ void MainSelectGame()
         switch (currentGameLevel)
         {
         case WAITING:
+            if (returnFlag2 || leaveGameFlag)
+            {
+                intentos = 3;
+            }
             userProgression = LoadProgressFile();
             UpdateSelectGame();
             DrawTextureEx(selectgame_txt, postionTexture, 0, 1.0f, WHITE); // fondo
@@ -1662,12 +1664,12 @@ void CheckWinOptionsLv1()
         {
             playsound(sound1, soundPaused);
             currentGameLevel = WAITING;
+            returnFlag2 = true;
         }
         if (CheckMouseOnOptionXandY("Si", 75, 0.75, 0.80)) // el usuario gano y desea seguir jugando
         {
             mnsj_win = true;
             playsound(sound1, soundPaused);
-            returnFlag2 = true;
             PlayMusicStream(NIVEL1);
             currentGameLevel = LEVEL1;
         }
@@ -1772,8 +1774,8 @@ void DrawGameOverLevel1(void)
         if (CheckMouseOnOptionY("Salir", 70, 0.78))
         {
             playsound(sound1, soundPaused);
-            currentGameLevel = WAITING;
             returnFlag2 = true;
+            currentGameLevel = WAITING;
         }
     }
 }
@@ -1802,8 +1804,8 @@ void DrawGameOverLevel2(void)
         if (CheckMouseOnOptionY("Salir", 70, 0.78))
         {
             playsound(sound1, soundPaused);
-            currentGameLevel = WAITING;
             leaveGameFlag = true;
+            currentGameLevel = WAITING;
         }
     }
 }
