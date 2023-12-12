@@ -495,7 +495,7 @@ void MainSelectGame()
     }
 
     Color preColors[3] = {GREEN, ORANGE, RED};
-    int maxPoints[] = {200, 200};
+    int maxPoints[] = {2500, 3000};
     TSaveProgress userProgression = LoadProgressFile();
     TSaveProgress currentUserProgression = {0};
     currentUserProgression.lastPointsLevel1 = 0;
@@ -2485,80 +2485,80 @@ float animation2(float start, float end, float t)
 
 void cargar_texturas(void)
 {
-    music = LoadMusicStream("audios_danna\\menu_musica.mp3");
-    level1 = LoadMusicStream("audios_danna\\LEVEL_.mp3");
-    NIVEL1 = LoadMusicStream("audios_danna\\LEVEL_1.mp3");
-    gameover = LoadMusicStream("audios_danna\\gameOver.mp3");
-    NIVEL2 = LoadMusicStream("audios_danna\\LEVEL2.mp3");
-    win = LoadMusicStream("audios_danna\\win.mp3");
+    music = LoadMusicStream("C:\\Program Files (x86)\\Sumpy\\menu_musica.mp3");
+    level1 = LoadMusicStream("C:\\Program Files (x86)\\Sumpy\\LEVEL_.mp3");
+    NIVEL1 = LoadMusicStream("C:\\Program Files (x86)\\Sumpy\\LEVEL_1.mp3");
+    gameover = LoadMusicStream("C:\\Program Files (x86)\\Sumpy\\gameOver.mp3");
+    NIVEL2 = LoadMusicStream("C:\\Program Files (x86)\\Sumpy\\LEVEL2.mp3");
+    win = LoadMusicStream("C:\\Program Files (x86)\\Sumpy\\win.mp3");
     /*********************************** SONIDOS ***********************************/
-    sound1 = LoadSound("audios_danna\\sonido-menu.wav");
-    sound2 = LoadSound("audios_danna\\selectDino.mp3");
-    sound3 = LoadSound("audios_danna\\selectLevel.mp3");
-    icon = LoadImage("imagenes_danna\\icon.png");
+    sound1 = LoadSound("C:\\Program Files (x86)\\Sumpy\\sonido-menu.wav");
+    sound2 = LoadSound("C:\\Program Files (x86)\\Sumpy\\selectDino.mp3");
+    sound3 = LoadSound("C:\\Program Files (x86)\\Sumpy\\selectLevel.mp3");
+    icon = LoadImage("C:\\Program Files (x86)\\Sumpy\\icon.png");
     /************************ FUENTES ****************************/
-    fonT = LoadFont("fuentes_danna\\Pixellari.ttf");
+    fonT = LoadFont("C:\\Program Files (x86)\\Sumpy\\Pixellari.ttf");
     /**************************** Background OPTIONS  ******************************/
-    background_options = LoadImage("imagenes_danna\\background_options.png");
+    background_options = LoadImage("C:\\Program Files (x86)\\Sumpy\\background_options.png");
     ImageResize(&background_options, screenWidth, screenHeight);
     texture_options = LoadTextureFromImage(background_options);
     UnloadImage(background_options);
     /**************************** Background START  ********************************/
-    som = LoadImage("imagenes_danna\\sheets\\shadow_2.png");
+    som = LoadImage("C:\\Program Files (x86)\\Sumpy\\sheets\\shadow_2.png");
     ImageResize(&som, 200, 200);
     sombra = LoadTextureFromImage(som);
-    texture_logo = LoadTexture("imagenes_danna\\logo.png");
-    background_start = LoadImage("imagenes_danna\\background_menu.png");
+    texture_logo = LoadTexture("C:\\Program Files (x86)\\Sumpy\\logo.png");
+    background_start = LoadImage("C:\\Program Files (x86)\\Sumpy\\background_menu.png");
     ImageResize(&background_start, screenWidth, screenHeight);
     texture_start = LoadTextureFromImage(background_start);
     UnloadImage(som);
     UnloadImage(background_start);
     /***************************** Background CUSTOME **********************************/
-    background_custome = LoadImage("imagenes_danna\\background_level2.png");
+    background_custome = LoadImage("C:\\Program Files (x86)\\Sumpy\\background_level2.png");
     ImageResize(&background_custome, screenWidth, screenHeight);
     texture_custome = LoadTextureFromImage(background_custome);
     UnloadImage(background_custome);
-    selectPers = LoadTexture("imagenes_danna\\select_character.png");
-    listo = LoadTexture("imagenes_danna\\listo.png");
+    selectPers = LoadTexture("C:\\Program Files (x86)\\Sumpy\\select_character.png");
+    listo = LoadTexture("C:\\Program Files (x86)\\Sumpy\\listo.png");
     /********************************** Dinosaurios ***********************************/
-    dino1 = LoadTexture("imagenes_danna\\sheets\\DinoSprites - doux.png");
-    dino2 = LoadTexture("imagenes_danna\\sheets\\DinoSprites - vita.png");
-    dino3 = LoadTexture("imagenes_danna\\sheets\\DinoSprites - mort.png");
-    dino4 = LoadTexture("imagenes_danna\\sheets\\DinoSprites - tard.png");
-    espy = LoadTexture("imagenes_danna\\ESPY.png");
-    nacky = LoadTexture("imagenes_danna\\NACKY.png");
-    juan = LoadTexture("imagenes_danna\\JUAN.png");
+    dino1 = LoadTexture("C:\\Program Files (x86)\\Sumpy\\sheets\\DinoSprites - doux.png");
+    dino2 = LoadTexture("C:\\Program Files (x86)\\Sumpy\\sheets\\DinoSprites - vita.png");
+    dino3 = LoadTexture("C:\\Program Files (x86)\\Sumpy\\sheets\\DinoSprites - mort.png");
+    dino4 = LoadTexture("C:\\Program Files (x86)\\Sumpy\\sheets\\DinoSprites - tard.png");
+    espy = LoadTexture("C:\\Program Files (x86)\\Sumpy\\ESPY.png");
+    nacky = LoadTexture("C:\\Program Files (x86)\\Sumpy\\NACKY.png");
+    juan = LoadTexture("C:\\Program Files (x86)\\Sumpy\\JUAN.png");
 }
 
 void cargar_texturas_main2(void)
 {
     /************************ Background SELECTGAME ******************************/
-    background_selectgame = LoadImage("imagenes_danna\\background_selectgame.png");
+    background_selectgame = LoadImage("C:\\Program Files (x86)\\Sumpy\\background_selectgame.png");
     ImageResize(&background_selectgame, screenWidth, screenHeight);
     selectgame_txt = LoadTextureFromImage(background_selectgame);
     UnloadImage(background_selectgame);
     /****************************** Background NIVEL 1 *****************************/
-    bg_level1 = LoadImage("imagenes_danna\\background_level1.png");
+    bg_level1 = LoadImage("C:\\Program Files (x86)\\Sumpy\\background_level1.png");
     ImageResize(&bg_level1, screenWidth, screenHeight);
     bg_level1_txt = LoadTextureFromImage(bg_level1);
     UnloadImage(bg_level1);
     /*********************************** Texturas niveles **************************************/
-    bordes = LoadTexture("imagenes_danna\\diseno_numeros.png");
-    icono = LoadTexture("imagenes_danna\\logoS.png");
-    mnsj_correcto = LoadTexture("imagenes_danna\\mnsj_correcto_dino.png");
-    mnsj_incorrecto = LoadTexture("imagenes_danna\\mnsj_incorrecto.png");
-    borde = LoadTexture("imagenes_danna\\borde.png");
-    ajustes = LoadTexture("imagenes_danna\\ajustes.png");
+    bordes = LoadTexture("C:\\Program Files (x86)\\Sumpy\\diseno_numeros.png");
+    icono = LoadTexture("C:\\Program Files (x86)\\Sumpy\\logoS.png");
+    mnsj_correcto = LoadTexture("C:\\Program Files (x86)\\Sumpy\\mnsj_correcto_dino.png");
+    mnsj_incorrecto = LoadTexture("C:\\Program Files (x86)\\Sumpy\\mnsj_incorrecto.png");
+    borde = LoadTexture("C:\\Program Files (x86)\\Sumpy\\borde.png");
+    ajustes = LoadTexture("C:\\Program Files (x86)\\Sumpy\\ajustes.png");
     /***************************  Imagenes de niveles *******************************/
-    level1_txt = LoadTexture("imagenes_danna\\selectLevel1-removebg-preview.png");
-    level2_txt = LoadTexture("imagenes_danna\\selectLevel2-removebg-preview.png");
-    estrellas_vacias = LoadTexture("imagenes_danna\\estrellas_vacias.png");
-    estrellas_vacias_1 = LoadTexture("imagenes_danna\\estrella_vacia_1.png");
-    estrellas = LoadTexture("imagenes_danna\\estrella.png");
-    perdiste = LoadTexture("imagenes_danna\\perdiste.png");
-    ganaste = LoadTexture("imagenes_danna\\ganaste.png");
+    level1_txt = LoadTexture("C:\\Program Files (x86)\\Sumpy\\selectLevel1-removebg-preview.png");
+    level2_txt = LoadTexture("C:\\Program Files (x86)\\Sumpy\\selectLevel2-removebg-preview.png");
+    estrellas_vacias = LoadTexture("C:\\Program Files (x86)\\Sumpy\\estrellas_vacias.png");
+    estrellas_vacias_1 = LoadTexture("C:\\Program Files (x86)\\Sumpy\\estrella_vacia_1.png");
+    estrellas = LoadTexture("C:\\Program Files (x86)\\Sumpy\\estrella.png");
+    perdiste = LoadTexture("C:\\Program Files (x86)\\Sumpy\\perdiste.png");
+    ganaste = LoadTexture("C:\\Program Files (x86)\\Sumpy\\ganaste.png");
     /******* textura selecciona un nivel*******/
-    selecNivel = LoadTexture("imagenes_danna\\SELECCIONA_UN_NIVEL.png");
+    selecNivel = LoadTexture("C:\\Program Files (x86)\\Sumpy\\SELECCIONA_UN_NIVEL.png");
 }
 
 int getRandomNumber(int ri, int rf)
