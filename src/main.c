@@ -119,6 +119,8 @@ int inputLengthNumbers = 0;
 int intentos = 3;
 bool returnFlag = false;
 bool leaveGameFlag = false;
+bool returnFlag2 = false;
+TSaveProgress SaveProgression = {0};
 /********************************** PROTOTIPO DE FUNCIONES ************************************/
 /*      ************************ MANEJO DE ESCENARIOS Y JUEGO ***********************/
 void logoLoading(int frameCounter);
@@ -142,7 +144,8 @@ bool verificar_multi(int gameMatrix[][MATRIX_WIDTH], Vector2 position[], int use
 void DrawOptionsLevel(int frame, float runningTime, float frameTime);
 void UpdateOptionLevel1();
 void DrawWin(int num);
-void DrawGameOver();
+void DrawGameOverLevel1();
+void DrawGameOverLevel2();
 void UpdateOptionLevel2();
 void CheckOptions();
 void CheckWinOptionsLv1();
@@ -453,7 +456,7 @@ void UpdateSelectGame()
         {
             playsound(sound1, soundPaused);
             currentGameLevel = LEAVE;
-            leaveGameFlag = true;
+            leaveGameFlag = false;
         }
     }
 }
@@ -492,7 +495,7 @@ void MainSelectGame()
     }
 
     Color preColors[3] = {GREEN, ORANGE, RED};
-    int maxPoints[] = {2500, 3500};
+    int maxPoints[] = {100, 100};
     TSaveProgress userProgression = LoadProgressFile();
     TSaveProgress currentUserProgression = {0};
     currentUserProgression.lastPointsLevel1 = 0;
@@ -511,40 +514,49 @@ void MainSelectGame()
                 frame = 0;
             }
         }
-
         switch (currentGameLevel)
         {
         case WAITING:
-            if (leaveGameFlag)
-            {
-                currentUserProgression.lastPointsLevel1 = 0;
-                currentUserProgression.lastPointsLevel2 = 0;
-                userProgression = LoadProgressFile();
-                intentos = 3;
-                leaveGameFlag = false;
-                printf("JOINED\n");
-                PlayMusicStream(NIVEL1);
-            }
+            userProgression = LoadProgressFile();
             UpdateSelectGame();
             DrawTextureEx(selectgame_txt, postionTexture, 0, 1.0f, WHITE); // fondo
             DrawTexture(selecNivel, 250, 150, WHITE);                      // imagen selecciona un nivel
             DrawSelectGame(frame, runningTime, frameTime, userProgression, maxPoints);
             break;
         case LEVEL1:
+            if (returnFlag2)
+            {
+                currentUserProgression.lastPointsLevel2 = SaveProgression.lastPointsLevel2;
+                currentUserProgression.lastPointsLevel1 = 0;
+                intentos = 3;
+                returnFlag2 = false;
+                PlayMusicStream(NIVEL1);
+            }
             currentUserProgression.lastPointsLevel1 = DrawGameLv1(gameMatrix, squareMatrixColor, preColors, postionTexture, frame, runningTime, frameTime, maxPoints, currentUserProgression.lastPointsLevel1);
             CheckOptions();
             if (currentUserProgression.lastPointsLevel1 > 0)
             {
-                SaveProgressFile(currentUserProgression);
+                SaveProgression.lastPointsLevel1 = currentUserProgression.lastPointsLevel1;
+                SaveProgressFile(SaveProgression);
             }
+            levelFlag = 0;
             break;
         case LEVEL2:
+            if (leaveGameFlag)
+            {
+                currentUserProgression.lastPointsLevel1 = SaveProgression.lastPointsLevel1;
+                currentUserProgression.lastPointsLevel2 = 0;
+                intentos = 3;
+                leaveGameFlag = false;
+                PlayMusicStream(NIVEL2);
+            }
             currentUserProgression.lastPointsLevel2 = DrawGameLv2(gameMatrix, squareMatrixColor, preColors, postionTexture, frame, runningTime, frameTime, maxPoints, currentUserProgression.lastPointsLevel2);
             levelFlag = 1;
             CheckOptions();
             if (currentUserProgression.lastPointsLevel2 > 0)
             {
-                SaveProgressFile(currentUserProgression);
+                SaveProgression.lastPointsLevel2 = currentUserProgression.lastPointsLevel2;
+                SaveProgressFile(SaveProgression);
             }
             printf("LEVEL 1: %d LEVEL 2: %d\n", currentUserProgression.lastPointsLevel1, currentUserProgression.lastPointsLevel2);
             break;
@@ -573,7 +585,6 @@ void MainSelectGame()
             pressedButtonNo1Flag = false;
             pressedButtonNo2Flag = false;
         }
-
     } while (!WindowShouldClose() && !salir);
     UnloadTexture(perdiste);
     UnloadTexture(ajustes);
@@ -590,6 +601,7 @@ void MainSelectGame()
     UnloadTexture(level2_txt);
     UnloadTexture(selecNivel);
     UnloadTexture(selectgame_txt);
+    SaveProgressFile(SaveProgression);
 }
 
 void DrawSelectGame(int frame, float runningTime, float frameTime, TSaveProgress userProgression, int maxPoints[])
@@ -1033,7 +1045,7 @@ int DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_W
             PauseMusicStream(NIVEL1);
             UpdateMusicStream(gameover);
         }
-        DrawGameOver();
+        DrawGameOverLevel1();
     }
     if (currentPoints >= maxPoints[0])
     {
@@ -1093,21 +1105,7 @@ void UpdateGameLv1()
         {
             playsound(sound1, soundPaused);
             currentGameLevel = WAITING;
-            leaveGameFlag = true;
-        }
-        if (CheckMouseOnOptionXandY("No", 75, 1.15, 0.80)) // el usuario gano y  desea salir del juego
-        {
-            playsound(sound1, soundPaused);
-            currentGameLevel = WAITING;
-            leaveGameFlag = true;
-        }
-        if (CheckMouseOnOptionXandY("Si", 75, 0.75, 0.80)) // el usuario gano y desea seguir jugando
-        {
-            mnsj_win = true;
-            playsound(sound1, soundPaused);
-            returnFlag = true;
-            UpdateMusicStream(NIVEL1);
-            currentGameLevel = LEVEL1;
+            returnFlag2 = true;
         }
     }
 }
@@ -1441,7 +1439,7 @@ int DrawGameLv2(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_W
             PauseMusicStream(NIVEL2);
             UpdateMusicStream(gameover);
         }
-        DrawGameOver();
+        DrawGameOverLevel2();
     }
     if (currentPoints >= maxPoints[1])
     {
@@ -1542,7 +1540,7 @@ void UpdateOptionLevel1()
             pressedButtonNo1Flag = false;
             pressedButtonNo2Flag = false;
             isMousePressedCollision[0].x = -1.0f;
-            leaveGameFlag = true;
+            returnFlag2 = true;
             intentos = 3;
             mnsj_win = false;
         }
@@ -1614,6 +1612,7 @@ void UpdateOptionLevel2()
             pressedButtonNo1Flag = false;
             pressedButtonNo2Flag = false;
             isMousePressedCollision[0].x = -1.0f;
+            leaveGameFlag = true;
             intentos = 3;
             mnsj_win2 = false;
         }
@@ -1663,13 +1662,12 @@ void CheckWinOptionsLv1()
         {
             playsound(sound1, soundPaused);
             currentGameLevel = WAITING;
-            //leaveGameFlag = true;
         }
         if (CheckMouseOnOptionXandY("Si", 75, 0.75, 0.80)) // el usuario gano y desea seguir jugando
         {
-            mnsj_win2 = true;
+            mnsj_win = true;
             playsound(sound1, soundPaused);
-            returnFlag = true;
+            returnFlag2 = true;
             PlayMusicStream(NIVEL1);
             currentGameLevel = LEVEL1;
         }
@@ -1683,13 +1681,12 @@ void CheckWinOptionsLv2()
         {
             playsound(sound1, soundPaused);
             currentGameLevel = WAITING;
-            //leaveGameFlag = true;
+            leaveGameFlag = true;
         }
         if (CheckMouseOnOptionXandY("Si", 75, 0.75, 0.80)) // el usuario gano y desea seguir jugando
         {
             mnsj_win2 = true;
             playsound(sound1, soundPaused);
-            returnFlag = true;
             PlayMusicStream(NIVEL2);
             currentGameLevel = LEVEL2;
         }
@@ -1750,7 +1747,37 @@ void DrawWin(int num)
         CheckWinOptionsLv2();
     }
 }
-void DrawGameOver(void)
+void DrawGameOverLevel1(void)
+{
+    Color color1 = {234, 255, 166, 255};
+    Color rectangleColor = {0, 0, 0, 140};
+    DrawRectangle(0, 0, 1920, 1080, rectangleColor);
+
+    Rectangle rec = {200, 180, 1500, 800};
+    Color color_rec = {21, 53, 13, 255};
+    Color color_bordes = {12, 29, 7, 255};
+    DrawRectangleRounded(rec, 0.35, 0.50, color_rec);
+    DrawRectangleRoundedLines(rec, 0.35, 0.50, 20, color_bordes);
+    DrawTexture(perdiste, screenWidth / 3.5, 200, WHITE);
+    Vector2 pos = {screenWidth / 3.5, screenHeight / 2};
+    Vector2 pos2 = {screenWidth / 2.6, screenHeight / 1.8};
+    DrawTextEx(fonT, "Te has quedado sin intentos", pos, 70, 0, color1);
+    DrawTextEx(fonT, "Juega de nuevo!", pos2, 70, 0, color1);
+    Rectangle rec_mini = {screenWidth / 2.35, screenHeight / 1.3, 300, 70};
+    DrawRectangleRounded(rec_mini, 0.35, 0.50, rectangleColor);
+    DrawRectangleRoundedLines(rec_mini, 0.35, 0.50, 10, color_bordes);
+    texto_sencillo("Salir", 0.78, 70, 2, 1.3, 0);
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+    {
+        if (CheckMouseOnOptionY("Salir", 70, 0.78))
+        {
+            playsound(sound1, soundPaused);
+            currentGameLevel = WAITING;
+            returnFlag2 = true;
+        }
+    }
+}
+void DrawGameOverLevel2(void)
 {
     Color color1 = {234, 255, 166, 255};
     Color rectangleColor = {0, 0, 0, 140};
