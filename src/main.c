@@ -188,6 +188,8 @@ int main()
     cargar_texturas();
     SetWindowIcon(icon);
     PlayMusicStream(music);
+    PlayMusicStream(gameover);
+    PlayMusicStream(win);
     PlayMusicStream(level1);
     PlayMusicStream(NIVEL1);
     PlayMusicStream(NIVEL2);
