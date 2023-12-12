@@ -141,9 +141,12 @@ int DrawGameLv2(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_W
 bool verificar_multi(int gameMatrix[][MATRIX_WIDTH], Vector2 position[], int userInput);
 void DrawOptionsLevel(int frame, float runningTime, float frameTime);
 void UpdateOptionLevel1();
-void DrawWin(void);
-void DrawGameOver(void);
+void DrawWin(int num);
+void DrawGameOver();
 void UpdateOptionLevel2();
+void CheckOptions();
+void CheckWinOptionsLv1();
+void CheckWinOptionsLv2();
 
 bool verificar_suma(int gameMatrix[][MATRIX_WIDTH], Vector2 position[], int userInput);
 //******************************   DINOSAURIOS   *************************************
@@ -450,6 +453,7 @@ void UpdateSelectGame()
         {
             playsound(sound1, soundPaused);
             currentGameLevel = LEAVE;
+            leaveGameFlag = true;
         }
     }
 }
@@ -488,7 +492,7 @@ void MainSelectGame()
     }
 
     Color preColors[3] = {GREEN, ORANGE, RED};
-    int maxPoints[] = {100, 100};
+    int maxPoints[] = {100, 3000};
     TSaveProgress userProgression = LoadProgressFile();
     TSaveProgress currentUserProgression = {0};
     currentUserProgression.lastPointsLevel1 = 0;
@@ -513,9 +517,12 @@ void MainSelectGame()
         case WAITING:
             if (leaveGameFlag)
             {
-                intentos = 3;
+                currentUserProgression.lastPointsLevel1 = 0;
+                currentUserProgression.lastPointsLevel2 = 0;
                 userProgression = LoadProgressFile();
+                intentos = 3;
                 leaveGameFlag = false;
+                printf("JOINED\n");
                 PlayMusicStream(NIVEL1);
             }
             UpdateSelectGame();
@@ -525,19 +532,21 @@ void MainSelectGame()
             break;
         case LEVEL1:
             currentUserProgression.lastPointsLevel1 = DrawGameLv1(gameMatrix, squareMatrixColor, preColors, postionTexture, frame, runningTime, frameTime, maxPoints, currentUserProgression.lastPointsLevel1);
-            UpdateGameLv1();
-            SaveProgressFile(currentUserProgression);
+            CheckOptions();
+            if (currentUserProgression.lastPointsLevel1 > 0)
+            {
+                SaveProgressFile(currentUserProgression);
+            }
             break;
         case LEVEL2:
-            if (leaveGameFlag)
-            {
-                userProgression = LoadProgressFile();
-                leaveGameFlag = false;
-            }
             currentUserProgression.lastPointsLevel2 = DrawGameLv2(gameMatrix, squareMatrixColor, preColors, postionTexture, frame, runningTime, frameTime, maxPoints, currentUserProgression.lastPointsLevel2);
             levelFlag = 1;
-            UpdateOptionLevel2();
-            SaveProgressFile(currentUserProgression);
+            CheckOptions();
+            if (currentUserProgression.lastPointsLevel2 > 0)
+            {
+                SaveProgressFile(currentUserProgression);
+            }
+            printf("LEVEL 1: %d LEVEL 2: %d\n", currentUserProgression.lastPointsLevel1, currentUserProgression.lastPointsLevel2);
             break;
         case OPTIONS2:
             DrawOptionsLevel(frame, runningTime, frameTime);
@@ -744,7 +753,7 @@ int DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_W
     DrawTexture(icono, screenWidth / 2, 30, WHITE); // FALTTA PONER LOGO DE SUMPY
     DrawTextEx(fonT, "+", pos, 220, 0, WHITE);
     Vector2 pos_nivel = {40, 40};
-    DrawTextEx(fonT, "Level 1", pos_nivel, 100, 0, WHITE);
+    DrawTextEx(fonT, "Nivel 1", pos_nivel, 100, 0, WHITE);
     DrawTexture(ajustes, 1800, 30, WHITE);
     DrawRectangleRounded(rec_pnts, 0.30, 0.50, rectangleColor);
     Vector2 po_objt = {600, 750};
@@ -1019,17 +1028,23 @@ int DrawGameLv1(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_W
     DrawTextEx(fonT, number, pos_pnt, 55, 1, WHITE);
     if (intentos == 0)
     {
-        PauseMusicStream(NIVEL1);
-        UpdateMusicStream(gameover);
+        if (!musicPaused)
+        {
+            PauseMusicStream(NIVEL1);
+            UpdateMusicStream(gameover);
+        }
         DrawGameOver();
     }
     if (currentPoints >= maxPoints[0])
     {
         if (!mnsj_win)
         {
-            PauseMusicStream(NIVEL1);
-            UpdateMusicStream(win);
-            DrawWin();
+            if (!musicPaused)
+            {
+                PauseMusicStream(NIVEL1);
+                UpdateMusicStream(win);
+            }
+            DrawWin(1);
         }
     }
 
@@ -1147,7 +1162,7 @@ int DrawGameLv2(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_W
     DrawTexture(icono, screenWidth / 2, 30, WHITE); // FALTTA PONER LOGO DE SUMPY
     DrawTextEx(fonT, "x", pos, 220, 0, WHITE);
     Vector2 pos_nivel = {40, 40};
-    DrawTextEx(fonT, "Level 2", pos_nivel, 100, 0, WHITE);
+    DrawTextEx(fonT, "Nivel 2", pos_nivel, 100, 0, WHITE);
     DrawTexture(ajustes, 1800, 30, WHITE);
     DrawRectangleRounded(rec_pnts, 0.30, 0.50, rectangleColor);
     Vector2 po_objt = {600, 750};
@@ -1421,17 +1436,23 @@ int DrawGameLv2(int gameMatrix[][MATRIX_WIDTH], int squareMatrixColor[][MATRIX_W
     DrawTextEx(fonT, number, pos_pnt, 55, 1, WHITE);
     if (intentos == 0)
     {
-        PauseMusicStream(NIVEL2);
+        if (!musicPaused)
+        {
+            PauseMusicStream(NIVEL2);
+            UpdateMusicStream(gameover);
+        }
         DrawGameOver();
-        UpdateMusicStream(gameover);
     }
     if (currentPoints >= maxPoints[1])
     {
         if (!mnsj_win2)
         {
-            PauseMusicStream(NIVEL2);
-            UpdateMusicStream(win);
-            DrawWin();
+            if (!musicPaused)
+            {
+                PauseMusicStream(NIVEL2);
+                UpdateMusicStream(win);
+            }
+            DrawWin(2);
         }
     }
     EndDrawing();
@@ -1564,7 +1585,7 @@ void UpdateOptionLevel1()
     }
 }
 
-void UpdateOptionLevel2()
+void CheckOptions()
 {
     Vector2 mousePosition = GetMousePosition();
     Rectangle ajustes = {1820, 40, 300, 80};
@@ -1575,6 +1596,12 @@ void UpdateOptionLevel2()
             playsound(sound1, soundPaused);
             currentGameLevel = OPTIONS2;
         }
+    }
+}
+void UpdateOptionLevel2()
+{
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+    {
         if (CheckMouseOnOptionY("Abandonar nivel", 70, 0.78))
         {
             playsound(sound1, soundPaused);
@@ -1587,7 +1614,6 @@ void UpdateOptionLevel2()
             pressedButtonNo1Flag = false;
             pressedButtonNo2Flag = false;
             isMousePressedCollision[0].x = -1.0f;
-            leaveGameFlag = true;
             intentos = 3;
             mnsj_win2 = false;
         }
@@ -1627,17 +1653,37 @@ void UpdateOptionLevel2()
                 playsound(sound1, soundPaused);
             }
         }
-        if (CheckMouseOnOptionY("Salir", 70, 0.78))
-        {
-            playsound(sound1, soundPaused);
-            currentGameLevel = WAITING;
-            leaveGameFlag = true;
-        }
+    }
+}
+void CheckWinOptionsLv1()
+{
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+    {
         if (CheckMouseOnOptionXandY("No", 75, 1.15, 0.80)) // el usuario gano y  desea salir del juego
         {
             playsound(sound1, soundPaused);
             currentGameLevel = WAITING;
-            leaveGameFlag = true;
+            //leaveGameFlag = true;
+        }
+        if (CheckMouseOnOptionXandY("Si", 75, 0.75, 0.80)) // el usuario gano y desea seguir jugando
+        {
+            mnsj_win2 = true;
+            playsound(sound1, soundPaused);
+            returnFlag = true;
+            PlayMusicStream(NIVEL1);
+            currentGameLevel = LEVEL1;
+        }
+    }
+}
+void CheckWinOptionsLv2()
+{
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+    {
+        if (CheckMouseOnOptionXandY("No", 75, 1.15, 0.80)) // el usuario gano y  desea salir del juego
+        {
+            playsound(sound1, soundPaused);
+            currentGameLevel = WAITING;
+            //leaveGameFlag = true;
         }
         if (CheckMouseOnOptionXandY("Si", 75, 0.75, 0.80)) // el usuario gano y desea seguir jugando
         {
@@ -1649,8 +1695,7 @@ void UpdateOptionLevel2()
         }
     }
 }
-
-void DrawWin(void)
+void DrawWin(int num)
 {
     Color color1 = {234, 255, 166, 255};
     Color select = {255, 200, 0, 255};
@@ -1696,6 +1741,14 @@ void DrawWin(void)
     {
         DrawTextEx(fonT, "No", pos_no, 80, 0.0, color1);
     }
+    if (num == 1)
+    {
+        CheckWinOptionsLv1();
+    }
+    else
+    {
+        CheckWinOptionsLv2();
+    }
 }
 void DrawGameOver(void)
 {
@@ -1717,6 +1770,15 @@ void DrawGameOver(void)
     DrawRectangleRounded(rec_mini, 0.35, 0.50, rectangleColor);
     DrawRectangleRoundedLines(rec_mini, 0.35, 0.50, 10, color_bordes);
     texto_sencillo("Salir", 0.78, 70, 2, 1.3, 0);
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+    {
+        if (CheckMouseOnOptionY("Salir", 70, 0.78))
+        {
+            playsound(sound1, soundPaused);
+            currentGameLevel = WAITING;
+            leaveGameFlag = true;
+        }
+    }
 }
 //******************************   DINOSAURIOS   *************************************
 void DrawCustome(int frame, float runningTime, float frameTime)
@@ -2295,7 +2357,7 @@ void animationChange(int squareMatrixColor[][MATRIX_WIDTH], int gameMatrix[][MAT
         DrawTexture(ajustes, 1800, 30, WHITE);
         if (maxPointsIndex)
         {
-            DrawTextEx(fonT, "Level 2", pos_nivel, 100, 0, WHITE);
+            DrawTextEx(fonT, "Nivel 2", pos_nivel, 100, 0, WHITE);
             DrawTextEx(fonT, "x", pos, 220, 0, WHITE);
             if (!musicPaused)
             {
@@ -2304,7 +2366,7 @@ void animationChange(int squareMatrixColor[][MATRIX_WIDTH], int gameMatrix[][MAT
         }
         else
         {
-            DrawTextEx(fonT, "Level 1", pos_nivel, 100, 0, WHITE);
+            DrawTextEx(fonT, "Nivel 1", pos_nivel, 100, 0, WHITE);
             DrawTextEx(fonT, "+", pos, 220, 0, WHITE);
             if (!musicPaused)
             {
