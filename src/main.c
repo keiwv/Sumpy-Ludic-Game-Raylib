@@ -492,7 +492,7 @@ void MainSelectGame()
     }
 
     Color preColors[3] = {GREEN, ORANGE, RED};
-    int maxPoints[] = {100, 3000};
+    int maxPoints[] = {2500, 3500};
     TSaveProgress userProgression = LoadProgressFile();
     TSaveProgress currentUserProgression = {0};
     currentUserProgression.lastPointsLevel1 = 0;
