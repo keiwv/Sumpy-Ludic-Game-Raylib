@@ -2675,7 +2675,7 @@ void verifyLineThree(int squareMatrixColor[][MATRIX_WIDTH])
 void SaveProgressFile(TSaveProgress progress)
 {
     FILE *fa;
-    fa = fopen("progress.dll", "ab");
+    fa = fopen("C:\\Program Files (x86)\\Sumpy\\progress.dll", "ab");
     fseek(fa, 0, SEEK_END);
     fwrite(&progress, sizeof(TSaveProgress), 1, fa);
     fclose(fa);
@@ -2686,7 +2686,7 @@ TSaveProgress LoadProgressFile()
     FILE *fa;
     TSaveProgress temp, penultimate;
 
-    fa = fopen("progress.dll", "rb");
+    fa = fopen("C:\\Program Files (x86)\\Sumpy\\progress.dll", "rb");
     if (fa)
     {
         if (fread(&temp, sizeof(TSaveProgress), 1, fa))
