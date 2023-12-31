@@ -25,6 +25,6 @@ This repository is an university final project.
 ---
 &emsp;This game was made using raylib, if you want to modify the code and compile it, you will need to have the last version of **<a href="https://github.com/skeeto/w64devkit">`w64devkit`</a>**.
 
-&emsp;If you have any issue with the game, remember to check the **User Manual** and do not forget to check **Technical Manual** as well to know about how we made the code!
+&emsp;If you have any issue with the game, remember to check the **User Manual** and do not forget to check **Technical Manual** as well to know about how we made the code! (Spanish only).
 
 ---
