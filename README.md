@@ -4,8 +4,8 @@
 This repository is an university final project.
 
 #### Made by: 
-- Brayan Ivan Perez Ventura - Enrollment: 372781
-- Danna Guadalupe Sandez Islas - Enrollment: 373080
+- Brayan Perez 
+- Danna Sandez  
 ### Teacher:
 * Pedro Nuñez Yepiz
 ---
